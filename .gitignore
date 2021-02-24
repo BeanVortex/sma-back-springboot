@@ -1,6 +1,4 @@
-.vscode/launch.json
-.gradle/
+.*
 bin/
-.setting/
-.classpath
-.project
+.gitignore
+build/

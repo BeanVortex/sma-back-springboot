@@ -29,11 +29,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import ir.darkdeveloper.sma.Users.Repo.UserRepository;
-import ir.darkdeveloper.sma.Users.UserModels.Authority;
-import ir.darkdeveloper.sma.Users.UserModels.UserModel;
+import ir.darkdeveloper.sma.Users.Models.Authority;
+import ir.darkdeveloper.sma.Users.Models.UserModel;
+import ir.darkdeveloper.sma.Users.Repo.UserRepo;
 
-@Service
+@Service("userService")
 public class UserService implements UserDetailsService {
 
     @Value("${spring.security.user.name}")
@@ -43,11 +43,11 @@ public class UserService implements UserDetailsService {
     private String adminPassword;
 
     private final PasswordEncoder encoder;
-    private final UserRepository repo;
+    private final UserRepo repo;
     private final UserRolesService roleService;
 
     @Autowired
-    public UserService(@Lazy PasswordEncoder encoder, UserRepository repo, UserRolesService roleService) {
+    public UserService(@Lazy PasswordEncoder encoder, UserRepo repo, UserRolesService roleService) {
         this.repo = repo;
         this.encoder = encoder;
         this.roleService = roleService;
@@ -124,6 +124,7 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('OP_ACCESS_ADMIN','OP_ACCESS_USER')")
     public Page<UserModel> allUsers(Pageable pageable) {
         return repo.findAll(pageable);
     }

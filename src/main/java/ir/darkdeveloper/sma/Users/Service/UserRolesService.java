@@ -7,16 +7,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import ir.darkdeveloper.sma.Users.Repo.UserRolesRepository;
-import ir.darkdeveloper.sma.Users.UserModels.UserRoles;
+import ir.darkdeveloper.sma.Users.Models.UserRoles;
+import ir.darkdeveloper.sma.Users.Repo.UserRolesRepo;
 
 @Service
 public class UserRolesService {
 
-    private final UserRolesRepository repo;
+    private final UserRolesRepo repo;
 
     @Autowired
-    public UserRolesService(UserRolesRepository repo) {
+    public UserRolesService(UserRolesRepo repo) {
         this.repo = repo;
     }
 

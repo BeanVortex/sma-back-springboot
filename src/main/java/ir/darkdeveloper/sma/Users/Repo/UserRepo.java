@@ -7,10 +7,10 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import ir.darkdeveloper.sma.Users.UserModels.UserModel;
+import ir.darkdeveloper.sma.Users.Models.UserModel;
 
 @Repository
-public interface UserRepository extends PagingAndSortingRepository<UserModel, Long> {
+public interface UserRepo extends PagingAndSortingRepository<UserModel, Long> {
 
     @Query("SELECT model FROM UserModel model WHERE model.email = :username OR model.userName = :username")
     public UserModel findByEmailOrUsername(@Param("username") String username);

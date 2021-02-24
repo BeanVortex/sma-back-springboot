@@ -1,4 +1,4 @@
-package ir.darkdeveloper.sma.Post.Comment;
+package ir.darkdeveloper.sma.Post.Models;
 
 import java.time.LocalDateTime;
 
@@ -13,7 +13,6 @@ import javax.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import ir.darkdeveloper.sma.Post.PostModel;
 import lombok.Data;
 
 @Data

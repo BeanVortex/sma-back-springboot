@@ -1,4 +1,4 @@
-package ir.darkdeveloper.sma.Users;
+package ir.darkdeveloper.sma.Users.Controllers;
 
 import java.util.List;
 
@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import ir.darkdeveloper.sma.Users.Models.UserRoles;
 import ir.darkdeveloper.sma.Users.Service.UserRolesService;
-import ir.darkdeveloper.sma.Users.UserModels.UserRoles;
 
 @RestController
 @RequestMapping("/api/user/role")

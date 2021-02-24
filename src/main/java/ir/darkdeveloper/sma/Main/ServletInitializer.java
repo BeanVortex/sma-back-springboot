@@ -1,4 +1,4 @@
-package ir.darkdeveloper.sma;
+package ir.darkdeveloper.sma.Main;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;

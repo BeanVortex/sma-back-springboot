@@ -1,4 +1,4 @@
-package ir.darkdeveloper.sma;
+package ir.darkdeveloper.sma.Main;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;

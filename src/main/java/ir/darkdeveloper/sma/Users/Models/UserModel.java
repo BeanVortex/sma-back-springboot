@@ -1,4 +1,4 @@
-package ir.darkdeveloper.sma.Users.UserModels;
+package ir.darkdeveloper.sma.Users.Models;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -28,7 +29,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.multipart.MultipartFile;
 
-import ir.darkdeveloper.sma.Post.PostModel;
+import ir.darkdeveloper.sma.Post.Models.PostModel;
 import lombok.Data;
 
 @Data
@@ -63,7 +64,8 @@ public class UserModel implements UserDetails {
     private String profilePicture;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role", referencedColumnName = "name"))
+    @JoinTable(joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+     inverseJoinColumns = @JoinColumn(name = "role", referencedColumnName = "name"))
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private List<UserRoles> roles;
 
@@ -75,7 +77,7 @@ public class UserModel implements UserDetails {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @ManyToMany(mappedBy = "users")
+    @OneToMany(mappedBy = "users")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<PostModel> posts;
 

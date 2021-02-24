@@ -1,4 +1,4 @@
-package ir.darkdeveloper.sma.Users.UserModels;
+package ir.darkdeveloper.sma.Users.Models;
 
 import java.io.Serializable;
 import java.util.List;

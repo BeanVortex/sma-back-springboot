@@ -14,6 +14,6 @@ public interface UserRolesRepo extends JpaRepository<UserRoles, Long>{
     
     // @Query("SELECT role FROM UserRoles role WHERE role.name = :name")
     // public UserRoles findByName(String name);
-
+    
     public List<UserRoles> findByName(String name);
 }

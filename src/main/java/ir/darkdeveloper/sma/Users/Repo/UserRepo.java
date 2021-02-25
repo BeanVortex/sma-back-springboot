@@ -17,10 +17,6 @@ public interface UserRepo extends PagingAndSortingRepository<UserModel, Long> {
 
     public UserModel findUserById(Long id);
 
-    @Query("SELECT model FROM UserModel model")
+    //@Query("SELECT model FROM UserModel model")
     public Page<UserModel> findAll(Pageable pageable);
-
-    // @Query("SELECT * FROM UserModel model WHERE model.username = :username")
-    // public Page<UserModel> findByUsername(@Param("username") String username, Pageable pageable);
-
 }

@@ -70,7 +70,7 @@ public class UserService implements UserDetailsService {
     @Transactional
     public UserModel saveUser(UserModel model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || authentication.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
+        if (authentication.getName().equals("anonymousUser") || authentication.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
                 || authentication.getName().equals(model.getEmail())) {
             try {
                 validateUserData(model);

@@ -39,7 +39,7 @@ public class UserRolesController {
         return service.saveRole(role);
     }
 
-    @DeleteMapping({"/{id}", "/{id}/"})
+    @DeleteMapping("/{id}/")
     @PreAuthorize("hasAuthority('OP_DELETE_ROLE')")
     public ResponseEntity<?> deleteRole(@PathVariable("id") Long id){
         return service.deleteRole(id);

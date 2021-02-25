@@ -19,7 +19,7 @@ import ir.darkdeveloper.sma.Post.Models.PostModel;
 import ir.darkdeveloper.sma.Post.Service.PostService;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/post")
 @CrossOrigin("*")
 public class PostController {
 
@@ -30,28 +30,29 @@ public class PostController {
         this.service = service;
     }
 
-    @PostMapping({"/post", "/post/"})
+    @PostMapping("/")
     public ResponseEntity<?> savePost(@ModelAttribute PostModel model) {
         return service.savePost(model);
     }
 
-    @GetMapping({"/post", "/post/"})
-    public Page<PostModel> allPosts(Pageable pageable){
+    @GetMapping("/")
+    public Page<PostModel> allPosts(Pageable pageable) {
         return service.allPosts(pageable);
     }
 
-    @GetMapping({"/post/{id}", "/post/{id}/"})
-    public PostModel getOnePost(@PathVariable("id") Long id){
+    @GetMapping("/{id}/")
+    public PostModel getOnePost(@PathVariable("id") Long id) {
         return service.getOnePost(id);
     }
 
-    @GetMapping({"/post/search", "/post/search/"})
-    public Page<PostModel> searchPost(@RequestParam String content, @RequestParam String title, Pageable pageable) {
+    @GetMapping("/search/")
+    public Page<PostModel> searchPost(@RequestParam String content,
+            @RequestParam(required = false) String title, Pageable pageable) {
         return service.searchPost(content, title, pageable);
     }
 
-    @DeleteMapping({"/post/", "/post"})
-    public ResponseEntity<?> deletePost(@RequestBody PostModel model){
+    @DeleteMapping("/")
+    public ResponseEntity<?> deletePost(@RequestBody PostModel model) {
         return service.deletePost(model);
     }
 

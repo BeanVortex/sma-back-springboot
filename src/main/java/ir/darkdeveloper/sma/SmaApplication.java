@@ -1,4 +1,4 @@
-package ir.darkdeveloper.sma.Main;
+package ir.darkdeveloper.sma;
 
 
 import org.springframework.boot.SpringApplication;
@@ -9,7 +9,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class SmaApplication {
 
     public static void main(String[] args) {
+        
         SpringApplication.run(SmaApplication.class, args);
     }
 
 }
+
+

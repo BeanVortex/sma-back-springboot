@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -22,8 +23,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -54,7 +53,7 @@ public class UserModel implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    private Boolean enabled;
+    private Boolean enabled = true;
 
     @Transient
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -77,8 +76,7 @@ public class UserModel implements UserDetails {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "users")
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @OneToMany(mappedBy="user", cascade = CascadeType.REMOVE)
     private List<PostModel> posts;
 
     @Override
@@ -107,21 +105,25 @@ public class UserModel implements UserDetails {
         return auth;
     }
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
-
+    
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public boolean isEnabled() {
         return this.getEnabled();

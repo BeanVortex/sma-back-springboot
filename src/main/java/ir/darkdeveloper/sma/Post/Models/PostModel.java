@@ -9,7 +9,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -52,8 +51,9 @@ public class PostModel {
   private String image;
 
   @ManyToOne
-  @JoinTable(joinColumns = @JoinColumn(name = "post_id", referencedColumnName = "id"),
-   inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"))
+  // @JoinTable(joinColumns = @JoinColumn(name = "post_id", referencedColumnName = "id"),
+  //  inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"))
+  @JoinColumn(name="user_id", referencedColumnName="id")
   private UserModel user;
 
   // mappedBy is read-only. can't add comment while creating post

@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin("*")
 public class MainController {
 
-   @RequestMapping("/api")
-    public String index(){
+    @RequestMapping("/api")
+    public String index() {
         return "index";
     }
 }

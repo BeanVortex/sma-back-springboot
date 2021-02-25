@@ -42,11 +42,12 @@ public class PostService {
     }
 
     @Transactional
-    @PreAuthorize("authentication != null")
+    @PreAuthorize("authentication.name != 'anonymousUser'")
     public ResponseEntity<?> savePost(PostModel model) {
         try {
             // For updating Post img by deleting previous img and replacing with new one and
             // new name
+
             PostModel preModel = postRepo.findById(model.getId());
             if (model.getId() != null && model.getFile() != null) {
                 String path = ResourceUtils.getFile("classpath:static/img/posts/").getAbsolutePath() + File.separator
@@ -71,7 +72,7 @@ public class PostService {
         }
     }
 
-    @PreAuthorize("authentication != null")
+    @PreAuthorize("authentication.name != 'anonymousUser'")
     public ResponseEntity<?> newLike(PostModel model) {
 
         Long id = model.getId();

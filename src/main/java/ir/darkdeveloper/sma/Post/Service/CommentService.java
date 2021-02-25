@@ -3,7 +3,6 @@ package ir.darkdeveloper.sma.Post.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,6 @@ public class CommentService {
     private final PostRepo postRepo;
     private final UserRepo userRepo;
     private final UserService userService;
-    private Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
     @Autowired
     public CommentService(CommentRepo commentRepo, PostRepo postRepo, UserRepo userRepo, UserService userService) {
@@ -34,6 +32,7 @@ public class CommentService {
     public ResponseEntity<?> saveComment(CommentModel model) {
         try {
             UserModel userModel = userRepo.findUserById(postRepo.findById(model.getPost().getId()).getUser().getId());
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             //TODO delete admin access on production
             if (auth.getName().equals(userModel.getEmail()) || auth.getName().equals(userService.getAdminUsername())){
                 commentRepo.save(model);
@@ -47,9 +46,9 @@ public class CommentService {
         }
     }
 
-    @PreAuthorize("authentication.name == @userService.getAdminUsername()")
     public ResponseEntity<?> deleteComment(CommentModel comment) {
         try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             UserModel userModel = userRepo.findUserById(postRepo.findById(comment.getPost().getId()).getUser().getId());
             if (auth.getName().equals(userModel.getEmail()) || auth.getName().equals(userService.getAdminUsername())) {
                 commentRepo.deleteById(Long.valueOf(comment.getId()));

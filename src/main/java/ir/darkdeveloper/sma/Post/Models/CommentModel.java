@@ -27,7 +27,7 @@ public class CommentModel  {
     @Column(nullable = false)
     private String content;
 
-    private int likes;
+    private Long likes;
 
     @ManyToOne
     private PostModel post;

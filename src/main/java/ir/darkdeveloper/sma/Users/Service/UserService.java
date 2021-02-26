@@ -61,7 +61,7 @@ public class UserService implements UserDetailsService {
                     Authority.OP_ADD_ADMIN, Authority.OP_DELETE_ADMIN, Authority.OP_ACCESS_USER, Authority.OP_EDIT_USER,
                     Authority.OP_DELETE_USER, Authority.OP_ADD_USER, Authority.OP_ADD_ROLE, Authority.OP_DELETE_ROLE,
                     Authority.OP_ACCESS_ROLE };
-            return User.builder().username(adminUsername).password(encoder.encode(adminPassword))
+            return (UserDetails) User.builder().username(adminUsername).password(encoder.encode(adminPassword))
                     .authorities(authorities).build();
         }
         return repo.findByEmailOrUsername(username);

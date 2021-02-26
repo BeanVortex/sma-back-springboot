@@ -43,7 +43,7 @@ public class UserController {
     
 
 
-    @PostMapping("/signin/")
+    @PostMapping("/signup/")
     public UserModel saveUser(@ModelAttribute UserModel user){
         return service.saveUser(user);
     }

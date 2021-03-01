@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import ir.darkdeveloper.sma.Configs.Security.JWT.Crud.RefreshModel;
 import ir.darkdeveloper.sma.Configs.Security.JWT.Crud.RefreshService;
 import ir.darkdeveloper.sma.Users.Service.UserService;
 
@@ -26,7 +28,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private RefreshService refreshService;
 
     @Autowired
-    public JwtFilter(JwtUtils jwtUtils, UserService userService, RefreshService refreshService) {
+    public JwtFilter(@Lazy JwtUtils jwtUtils, @Lazy UserService userService, RefreshService refreshService) {
         this.jwtUtils = jwtUtils;
         this.refreshService = refreshService;
         this.userService = userService;
@@ -39,26 +41,38 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String refreshToken = request.getHeader("RefreshToken");
         String accessToken = request.getHeader("AccessToken");
-        Long userId = Long.valueOf(request.getHeader("UserId"));
+        String user_id = request.getHeader("UserId");
 
-        String storedAccessToken = refreshService.getRefreshByUserId(userId).getAccessToken();
-        String storedRefreshToken = refreshService.getRefreshByUserId(userId).getRefreshToken();
+        if (user_id != null) {
+            Long userId = Long.parseLong(user_id);
 
-        if (refreshToken != null && accessToken != null) {
-            if (accessToken.equals(storedAccessToken) && refreshToken.equals(storedRefreshToken)) {
+            String storedAccessToken = refreshService.getRefreshByUserId(userId).getAccessToken();
+            String storedRefreshToken = refreshService.getRefreshByUserId(userId).getRefreshToken();
 
-                String username = jwtUtils.getUsername(refreshToken);
-                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (refreshToken != null && accessToken != null) {
+                if (accessToken.equals(storedAccessToken) && refreshToken.equals(storedRefreshToken)) {
 
-                if (username != null && auth == null || jwtUtils.isTokenExpired(accessToken)) {
-                    UserDetails userDetails = userService.loadUserByUsername(username);
-                    UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(userDetails,
-                            null, userDetails.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(upToken);
-                    String newAccessToken = jwtUtils.generateAccessToken(username);
-                    refreshService.updateTokenByUserId(userId, newAccessToken);
-                    response.addHeader("AccessToken", newAccessToken);
-                    response.addHeader("RefreshToken", refreshToken);
+                    String username = jwtUtils.getUsername(refreshToken);
+                    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+                    if (username != null && auth == null || jwtUtils.isTokenExpired(accessToken)) {
+                        UserDetails userDetails = userService.loadUserByUsername(username);
+                        UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities());
+                        SecurityContextHolder.getContext().setAuthentication(upToken);
+                        String newAccessToken = jwtUtils.generateAccessToken(username);
+                        RefreshModel refreshModel = new RefreshModel();
+                        refreshModel.setAccessToken(newAccessToken);
+                        refreshModel.setUserId(userId);
+                        if (username.equals(userService.getAdminUsername())) {
+                            refreshModel.setId(refreshService.getIdByUserId(userService.getAdminId()));
+                        } else {
+
+                        }
+                        refreshService.saveToken(refreshModel);
+                        response.addHeader("AccessToken", newAccessToken);
+                        response.addHeader("RefreshToken", refreshToken);
+                    }
                 }
             }
         }

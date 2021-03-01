@@ -49,6 +49,8 @@ public class UserService implements UserDetailsService {
     @Value("${spring.security.user.password}")
     private String adminPassword;
 
+    private final Long adminId = -1L;
+
     private final PasswordEncoder encoder;
     private final UserRepo repo;
     private final UserRolesService roleService;
@@ -100,32 +102,6 @@ public class UserService implements UserDetailsService {
         return null;
     }
 
-    private void validateUserData(UserModel model) throws FileNotFoundException, IOException, Exception {
-        model.setRoles(roleService.getRole("USER"));
-
-        if (model.getUserName() == null || model.getUserName().trim().equals("")) {
-            model.setUserName(model.getEmail().split("@")[0]);
-        }
-
-        UserModel preModel = repo.findUserById(model.getId());
-
-        if (model.getId() != null && model.getFile() != null) {
-            String path = ResourceUtils.getFile("classpath:static/img/profiles/").getAbsolutePath() + File.separator
-                    + preModel.getProfilePicture();
-            Files.delete(Paths.get(path));
-        }
-
-        if (preModel != null && preModel.getProfilePicture() != null) {
-            model.setProfilePicture(preModel.getProfilePicture());
-        }
-
-        String fileName = saveFile(model.getFile());
-        if (fileName != null) {
-            model.setProfilePicture(fileName);
-        }
-        model.setPassword(encoder.encode(model.getPassword()));
-    }
-
     @Transactional
     @PreAuthorize("authentication.name == this.getAdminUsername() || #user.getEmail() == authentication.name")
     public ResponseEntity<?> deleteUser(UserModel user) {
@@ -150,11 +126,20 @@ public class UserService implements UserDetailsService {
     }
 
     public ResponseEntity<?> loginUser(JwtAuth model, HttpServletResponse response) {
-        RefreshModel refreshModel = refreshService.getRefreshByUserId(repo.findUserIdByUsername(model.getUsername()));
-        if (!jwtUtils.isTokenExpired(refreshModel.getRefreshToken()) || refreshModel == null) {
+        //Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        RefreshModel refreshModel;
+        if (model.getUsername().equals(getAdminUsername())) {
+            authenticateUser(model, response);
+            refreshModel = refreshService.getRefreshByUserId(getAdminId());
+        } else {
+            refreshModel = refreshService.getRefreshByUserId(repo.findUserIdByUsername(model.getUsername()));
+        }
 
+        if (refreshModel == null || !jwtUtils.isTokenExpired(refreshModel.getRefreshToken())) {
             try {
-                authenticateUser(model, response);
+                if (!model.getUsername().equals(getAdminUsername())) {
+                    authenticateUser(model, response);
+                }
                 return new ResponseEntity<>(repo.findByEmailOrUsername(model.getUsername()), HttpStatus.OK);
             } catch (Exception e) {
                 return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -184,14 +169,48 @@ public class UserService implements UserDetailsService {
     }
 
     private void authenticateUser(JwtAuth model, HttpServletResponse response) {
-        authManager.authenticate(new UsernamePasswordAuthenticationToken(model.getUsername(), model.getPassword()));
+        String username = model.getUsername();
+        authManager.authenticate(new UsernamePasswordAuthenticationToken(username, model.getPassword()));
         RefreshModel rModel = new RefreshModel();
-        rModel.setRefreshToken(jwtUtils.generateRefreshToken(model.getUsername()));
-        rModel.setAccessToken(jwtUtils.generateAccessToken(model.getUsername()));
-        rModel.setUser((UserModel) loadUserByUsername(model.getUsername()));
+        String accessToken = jwtUtils.generateAccessToken(username);
+        String refreshToken = jwtUtils.generateRefreshToken(username);
+        rModel.setRefreshToken(refreshToken);
+        rModel.setAccessToken(accessToken);
+        if (model.getUsername().equals(getAdminUsername())) {
+            rModel.setUserId(getAdminId());
+            rModel.setId(refreshService.getIdByUserId(getAdminId()));
+        } else {
+            rModel.setUserId(repo.findUserIdByUsername(username));
+        }
         refreshService.saveToken(rModel);
-        response.addHeader("AccessToken", jwtUtils.generateAccessToken(model.getUsername()));
-        response.addHeader("RefreshToken", jwtUtils.generateRefreshToken(model.getUsername()));
+        response.addHeader("AccessToken", accessToken);
+        response.addHeader("RefreshToken", refreshToken);
+    }
+
+    private void validateUserData(UserModel model) throws FileNotFoundException, IOException, Exception {
+        model.setRoles(roleService.getRole("USER"));
+
+        if (model.getUserName() == null || model.getUserName().trim().equals("")) {
+            model.setUserName(model.getEmail().split("@")[0]);
+        }
+
+        UserModel preModel = repo.findUserById(model.getId());
+
+        if (model.getId() != null && model.getFile() != null) {
+            String path = ResourceUtils.getFile("classpath:static/img/profiles/").getAbsolutePath() + File.separator
+                    + preModel.getProfilePicture();
+            Files.delete(Paths.get(path));
+        }
+
+        if (preModel != null && preModel.getProfilePicture() != null) {
+            model.setProfilePicture(preModel.getProfilePicture());
+        }
+
+        String fileName = saveFile(model.getFile());
+        if (fileName != null) {
+            model.setProfilePicture(fileName);
+        }
+        model.setPassword(encoder.encode(model.getPassword()));
     }
 
     private String saveFile(MultipartFile file) throws Exception {
@@ -207,5 +226,9 @@ public class UserService implements UserDetailsService {
 
     public String getAdminUsername() {
         return adminUsername;
+    }
+
+    public Long getAdminId() {
+        return adminId;
     }
 }

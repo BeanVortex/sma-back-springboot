@@ -25,7 +25,7 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtFilter jwtFilter;
 
     @Autowired
-    public AppSecurityConfig(@Lazy UserService userService, @Lazy JwtFilter jwtFilter) {
+    public AppSecurityConfig(@Lazy UserService userService, JwtFilter jwtFilter) {
         this.userService = userService;
         this.jwtFilter = jwtFilter;
     }
@@ -35,7 +35,7 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf()
                 .disable()
                 .authorizeRequests()
-                .antMatchers("/", "/api/user/signin/", "/api/user/login/")
+                .antMatchers("/", "/api/user/signup/", "/api/user/login/")
                 .permitAll()
                 .anyRequest()
                 .authenticated()

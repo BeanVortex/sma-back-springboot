@@ -29,4 +29,8 @@ public class RefreshService {
         return repo.getRefreshByUserId(id);
     }
 
+	public Long getIdByUserId(Long adminId) {
+		return repo.getIdByUserId(adminId);
+	}
+
 }

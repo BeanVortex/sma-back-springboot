@@ -25,6 +25,7 @@ import ir.darkdeveloper.sma.Users.Service.UserService;
 public class UserController {
 
     private final UserService userService;
+    
 
     @Autowired
     public UserController(UserService userService) {
@@ -38,13 +39,14 @@ public class UserController {
 
     @PostMapping("/login/")
     public ResponseEntity<?> loginUser(@RequestBody JwtAuth model, HttpServletResponse response) {
-        return userService.loginUser(model, response);
+      return userService.loginUser(model, response);
     }
 
     @PostMapping("/update/")
     public UserModel updateUser(@ModelAttribute UserModel user) {
         return userService.updateUser(user);
     }
+
 
     @DeleteMapping("/")
     public ResponseEntity<?> deleteUser(@RequestBody UserModel user) {

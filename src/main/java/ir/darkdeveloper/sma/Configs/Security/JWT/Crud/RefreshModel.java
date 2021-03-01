@@ -6,7 +6,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import ir.darkdeveloper.sma.Users.Models.UserModel;
 import lombok.Data;
 
 @Data
@@ -20,7 +19,7 @@ public class RefreshModel {
     private Long id;
 
     @Column(name = "user_id")
-    private UserModel user;
+    private Long userId;
 
     private String accessToken;
     private String refreshToken;

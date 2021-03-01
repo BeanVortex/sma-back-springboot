@@ -1,6 +1,5 @@
 package ir.darkdeveloper.sma.Configs.Security.JWT;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.annotation.PostConstruct;
@@ -34,27 +33,29 @@ public class JwtUtils {
 
     //refresh token is used to generate access token
     public String generateRefreshToken(String username) {
+        Date date  = new Date(System.currentTimeMillis() + 60 * 60 * 24 * 7 * 3 * 1000);
         return Jwts.builder()
-                .signWith(SignatureAlgorithm.HS256, secret)
+                .signWith(SignatureAlgorithm.HS256, "secret")
                 .setSubject(username)
-                .setExpiration(new Date(LocalDateTime.now().plusWeeks(3).getSecond() * 1000))
+                .setExpiration(date)
                 .compact();
     }
 
     public String generateAccessToken(String username) {
+        Date date = new Date(System.currentTimeMillis() + 60 * 1 * 1000);
         return Jwts.builder()
-                .signWith(SignatureAlgorithm.HS256, secret)
+                .signWith(SignatureAlgorithm.HS256, "secret")
                 .setSubject(username)
-                .setExpiration(new Date(LocalDateTime.now().plusSeconds(60).getSecond() * 1000))
+                .setExpiration(date)
                 .compact();
     }
 
     public String getUsername(String token) {
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parser().setSigningKey("secret").parseClaimsJws(token).getBody().getSubject();
     }
 
     public Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+        return Jwts.parser().setSigningKey("secret").parseClaimsJws(token).getBody();
     }
 
     public Boolean isTokenExpired(String token) {
@@ -63,7 +64,7 @@ public class JwtUtils {
     }
 
     private Date getExpirationDate(String token) {
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getExpiration();
+        return Jwts.parser().setSigningKey("secret").parseClaimsJws(token).getBody().getExpiration();
     }
 
 }

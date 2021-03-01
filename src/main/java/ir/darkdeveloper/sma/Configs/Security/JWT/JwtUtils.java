@@ -42,7 +42,6 @@ public class JwtUtils {
     }
 
     public String generateAccessToken(String username) {
-        //TODO 
         Date date = new Date(System.currentTimeMillis() + 60 * 1 * 1000);
         return Jwts.builder()
                 .signWith(SignatureAlgorithm.HS256, secret)

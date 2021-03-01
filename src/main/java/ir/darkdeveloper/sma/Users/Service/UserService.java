@@ -159,7 +159,7 @@ public class UserService implements UserDetailsService {
                 JwtAuth jwtAuth = new JwtAuth();
                 jwtAuth.setUsername(model.getEmail());
                 jwtAuth.setPassword(model.getPassword());
-                authenticateUser(jwtAuth, rawPass, response);
+                authenticateUser(jwtAuth,model.getId(), rawPass, response);
                 return new ResponseEntity<>(repo.findByEmailOrUsername(model.getUsername()), HttpStatus.OK);
             } catch (Exception e) {
                 return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);

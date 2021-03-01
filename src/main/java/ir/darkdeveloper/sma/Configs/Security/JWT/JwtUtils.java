@@ -28,34 +28,35 @@ public class JwtUtils {
 
     @PostConstruct
     public void initSecret(){
-        secret = this.encoder.encode(secret);
+        secret = encoder.encode(secret);
     }
 
     //refresh token is used to generate access token
     public String generateRefreshToken(String username) {
         Date date  = new Date(System.currentTimeMillis() + 60 * 60 * 24 * 7 * 3 * 1000);
         return Jwts.builder()
-                .signWith(SignatureAlgorithm.HS256, "secret")
+                .signWith(SignatureAlgorithm.HS256, secret)
                 .setSubject(username)
                 .setExpiration(date)
                 .compact();
     }
 
     public String generateAccessToken(String username) {
+        //TODO 
         Date date = new Date(System.currentTimeMillis() + 60 * 1 * 1000);
         return Jwts.builder()
-                .signWith(SignatureAlgorithm.HS256, "secret")
+                .signWith(SignatureAlgorithm.HS256, secret)
                 .setSubject(username)
                 .setExpiration(date)
                 .compact();
     }
 
     public String getUsername(String token) {
-        return Jwts.parser().setSigningKey("secret").parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
     }
 
     public Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser().setSigningKey("secret").parseClaimsJws(token).getBody();
+        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
     }
 
     public Boolean isTokenExpired(String token) {
@@ -64,7 +65,7 @@ public class JwtUtils {
     }
 
     private Date getExpirationDate(String token) {
-        return Jwts.parser().setSigningKey("secret").parseClaimsJws(token).getBody().getExpiration();
+        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getExpiration();
     }
 
 }

@@ -126,19 +126,18 @@ public class UserService implements UserDetailsService {
     }
 
     public ResponseEntity<?> loginUser(JwtAuth model, HttpServletResponse response) {
-        //Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         RefreshModel refreshModel;
         if (model.getUsername().equals(getAdminUsername())) {
-            authenticateUser(model, response);
+            authenticateUser(model, null, null, response);
             refreshModel = refreshService.getRefreshByUserId(getAdminId());
         } else {
-            refreshModel = refreshService.getRefreshByUserId(repo.findUserIdByUsername(model.getUsername()));
+            refreshModel = refreshService.getRefreshByUserId(getUserIdByUsernameOrEmail(model.getUsername()));
         }
 
         if (refreshModel == null || !jwtUtils.isTokenExpired(refreshModel.getRefreshToken())) {
             try {
                 if (!model.getUsername().equals(getAdminUsername())) {
-                    authenticateUser(model, response);
+                    authenticateUser(model, getUserIdByUsernameOrEmail(model.getUsername()), null, response);
                 }
                 return new ResponseEntity<>(repo.findByEmailOrUsername(model.getUsername()), HttpStatus.OK);
             } catch (Exception e) {
@@ -154,12 +153,13 @@ public class UserService implements UserDetailsService {
                 || authentication.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
                 || authentication.getName().equals(model.getEmail())) {
             try {
+                String rawPass = model.getPassword();
                 validateUserData(model);
                 repo.save(model);
                 JwtAuth jwtAuth = new JwtAuth();
                 jwtAuth.setUsername(model.getEmail());
                 jwtAuth.setPassword(model.getPassword());
-                authenticateUser(jwtAuth, response);
+                authenticateUser(jwtAuth, rawPass, response);
                 return new ResponseEntity<>(repo.findByEmailOrUsername(model.getUsername()), HttpStatus.OK);
             } catch (Exception e) {
                 return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -168,9 +168,14 @@ public class UserService implements UserDetailsService {
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
-    private void authenticateUser(JwtAuth model, HttpServletResponse response) {
+    private void authenticateUser(JwtAuth model, Long userId, String rawPass, HttpServletResponse response) {
         String username = model.getUsername();
-        authManager.authenticate(new UsernamePasswordAuthenticationToken(username, model.getPassword()));
+        String password = model.getPassword();
+        if (rawPass != null) {
+            authManager.authenticate(new UsernamePasswordAuthenticationToken(username, rawPass));
+        } else {
+            authManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+        }
         RefreshModel rModel = new RefreshModel();
         String accessToken = jwtUtils.generateAccessToken(username);
         String refreshToken = jwtUtils.generateRefreshToken(username);
@@ -180,7 +185,8 @@ public class UserService implements UserDetailsService {
             rModel.setUserId(getAdminId());
             rModel.setId(refreshService.getIdByUserId(getAdminId()));
         } else {
-            rModel.setUserId(repo.findUserIdByUsername(username));
+            rModel.setId(refreshService.getIdByUserId(userId));
+            rModel.setUserId(getUserIdByUsernameOrEmail(username));
         }
         refreshService.saveToken(rModel);
         response.addHeader("AccessToken", accessToken);
@@ -222,6 +228,10 @@ public class UserService implements UserDetailsService {
             return fileName;
         }
         return null;
+    }
+
+    public Long getUserIdByUsernameOrEmail(String username) {
+        return repo.findUserIdByUsername(username);
     }
 
     public String getAdminUsername() {

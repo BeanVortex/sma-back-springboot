@@ -55,7 +55,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     String username = jwtUtils.getUsername(refreshToken);
                     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-                    if (username != null && auth == null || jwtUtils.isTokenExpired(accessToken)) {
+                    if (username != null && auth == null) {
                         UserDetails userDetails = userService.loadUserByUsername(username);
                         UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities());
@@ -63,11 +63,12 @@ public class JwtFilter extends OncePerRequestFilter {
                         String newAccessToken = jwtUtils.generateAccessToken(username);
                         RefreshModel refreshModel = new RefreshModel();
                         refreshModel.setAccessToken(newAccessToken);
+                        refreshModel.setRefreshToken(storedRefreshToken);
                         refreshModel.setUserId(userId);
                         if (username.equals(userService.getAdminUsername())) {
                             refreshModel.setId(refreshService.getIdByUserId(userService.getAdminId()));
                         } else {
-
+                            refreshModel.setId(refreshService.getIdByUserId(userService.getUserIdByUsernameOrEmail(username)));
                         }
                         refreshService.saveToken(refreshModel);
                         response.addHeader("AccessToken", newAccessToken);

@@ -163,12 +163,11 @@ public class UserService implements UserDetailsService {
         return new ResponseEntity<>("Already logged in!", HttpStatus.BAD_REQUEST);
     }
 
-    
     public ResponseEntity<?> signUpUser(UserModel model, HttpServletResponse response) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication.getName().equals("anonymousUser")
-        || authentication.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
-        || authentication.getName().equals(model.getEmail())) {
+                || authentication.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
+                || authentication.getName().equals(model.getEmail())) {
             try {
                 validateUserData(model);
                 repo.save(model);
@@ -183,11 +182,10 @@ public class UserService implements UserDetailsService {
         }
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
-    
+
     private void authenticateUser(JwtAuth model, HttpServletResponse response) {
-        authManager.authenticate(
-            new UsernamePasswordAuthenticationToken(model.getUsername(), model.getPassword()));
-            RefreshModel rModel = new RefreshModel();
+        authManager.authenticate(new UsernamePasswordAuthenticationToken(model.getUsername(), model.getPassword()));
+        RefreshModel rModel = new RefreshModel();
         rModel.setRefreshToken(jwtUtils.generateRefreshToken(model.getUsername()));
         rModel.setAccessToken(jwtUtils.generateAccessToken(model.getUsername()));
         rModel.setUser((UserModel) loadUserByUsername(model.getUsername()));
@@ -195,7 +193,6 @@ public class UserService implements UserDetailsService {
         response.addHeader("AccessToken", jwtUtils.generateAccessToken(model.getUsername()));
         response.addHeader("RefreshToken", jwtUtils.generateRefreshToken(model.getUsername()));
     }
-
 
     private String saveFile(MultipartFile file) throws Exception {
         if (file != null) {

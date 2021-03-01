@@ -44,17 +44,16 @@ public class JwtFilter extends OncePerRequestFilter {
         String storedAccessToken = refreshService.getRefreshByUserId(userId).getAccessToken();
         String storedRefreshToken = refreshService.getRefreshByUserId(userId).getRefreshToken();
 
-        if (refreshToken != null && accessToken != null){
-            if (accessToken.equals(storedAccessToken) && refreshToken.equals(storedRefreshToken)){
-
+        if (refreshToken != null && accessToken != null) {
+            if (accessToken.equals(storedAccessToken) && refreshToken.equals(storedRefreshToken)) {
 
                 String username = jwtUtils.getUsername(refreshToken);
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    
+
                 if (username != null && auth == null || jwtUtils.isTokenExpired(accessToken)) {
                     UserDetails userDetails = userService.loadUserByUsername(username);
-                    UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(userDetails, null,
-                            userDetails.getAuthorities());
+                    UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(userDetails,
+                            null, userDetails.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(upToken);
                     String newAccessToken = jwtUtils.generateAccessToken(username);
                     refreshService.updateTokenByUserId(userId, newAccessToken);

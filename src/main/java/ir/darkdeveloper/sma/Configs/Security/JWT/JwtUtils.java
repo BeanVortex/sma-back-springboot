@@ -3,6 +3,8 @@ package ir.darkdeveloper.sma.Configs.Security.JWT;
 import java.time.LocalDateTime;
 import java.util.Date;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +25,10 @@ public class JwtUtils {
     @Autowired
     public JwtUtils(PasswordEncoder encoder) {
         this.encoder = encoder;
+    }
+
+    @PostConstruct
+    public void initSecret(){
         secret = this.encoder.encode(secret);
     }
 

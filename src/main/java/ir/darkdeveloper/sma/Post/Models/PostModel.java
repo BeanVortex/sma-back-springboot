@@ -24,13 +24,14 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.web.multipart.MultipartFile;
 
 import ir.darkdeveloper.sma.Users.Models.UserModel;
+import ir.darkdeveloper.sma.Utils.ImageUtil;
 import lombok.Data;
 
 @Data
 @Entity
 @Table(name = "posts")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class PostModel {
+public class PostModel implements ImageUtil {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,7 +54,7 @@ public class PostModel {
   @ManyToOne
   // @JoinTable(joinColumns = @JoinColumn(name = "post_id", referencedColumnName = "id"),
   //  inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"))
-  @JoinColumn(name="user_id", referencedColumnName="id")
+  @JoinColumn(name = "user_id", referencedColumnName = "id")
   private UserModel user;
 
   // mappedBy is read-only. can't add comment while creating post
@@ -73,5 +74,10 @@ public class PostModel {
   @Column(name = "updated_at")
   @UpdateTimestamp
   private LocalDateTime updatedAt;
+
+  @Override
+  public String getImage() {
+    return image;
+  }
 
 }

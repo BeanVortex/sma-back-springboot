@@ -12,21 +12,21 @@ import ir.darkdeveloper.sma.Post.Repo.CommentRepo;
 import ir.darkdeveloper.sma.Post.Repo.PostRepo;
 import ir.darkdeveloper.sma.Users.Models.UserModel;
 import ir.darkdeveloper.sma.Users.Repo.UserRepo;
-import ir.darkdeveloper.sma.Users.Service.UserService;
+import ir.darkdeveloper.sma.Utils.UserUtils;
 
 @Service
 public class CommentService {
     private final CommentRepo commentRepo;
     private final PostRepo postRepo;
     private final UserRepo userRepo;
-    private final UserService userService;
+    private final UserUtils userUtils;
 
     @Autowired
-    public CommentService(CommentRepo commentRepo, PostRepo postRepo, UserRepo userRepo, UserService userService) {
+    public CommentService(CommentRepo commentRepo, PostRepo postRepo, UserRepo userRepo, UserUtils userUtils) {
         this.commentRepo = commentRepo;
         this.postRepo = postRepo;
         this.userRepo = userRepo;
-        this.userService = userService;
+        this.userUtils = userUtils;
     }
 
     public ResponseEntity<?> saveComment(CommentModel model) {
@@ -34,7 +34,7 @@ public class CommentService {
             UserModel userModel = userRepo.findUserById(postRepo.findById(model.getPost().getId()).getUser().getId());
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             //TODO delete admin access on production
-            if (auth.getName().equals(userModel.getEmail()) || auth.getName().equals(userService.getAdminUsername())){
+            if (auth.getName().equals(userModel.getEmail()) || auth.getName().equals(userUtils.getAdminUsername())){
                 commentRepo.save(model);
                 return new ResponseEntity<>(HttpStatus.OK);
             }else {
@@ -50,7 +50,7 @@ public class CommentService {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             UserModel userModel = userRepo.findUserById(postRepo.findById(comment.getPost().getId()).getUser().getId());
-            if (auth.getName().equals(userModel.getEmail()) || auth.getName().equals(userService.getAdminUsername())) {
+            if (auth.getName().equals(userModel.getEmail()) || auth.getName().equals(userUtils.getAdminUsername())) {
                 commentRepo.deleteById(Long.valueOf(comment.getId()));
                 return new ResponseEntity<>(HttpStatus.OK);
             } else {

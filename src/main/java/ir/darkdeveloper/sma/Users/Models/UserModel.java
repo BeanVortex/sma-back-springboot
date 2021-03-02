@@ -29,13 +29,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.multipart.MultipartFile;
 
 import ir.darkdeveloper.sma.Post.Models.PostModel;
+import ir.darkdeveloper.sma.Utils.ImageUtil;
 import lombok.Data;
 
 @Data
 @Entity
 @Table(name = "users")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class UserModel implements UserDetails {
+public class UserModel implements UserDetails, ImageUtil {
 
     private static final long serialVersionUID = 1L;
 
@@ -128,5 +129,10 @@ public class UserModel implements UserDetails {
     public boolean isEnabled() {
         return this.getEnabled();
     }
+
+	@Override
+	public String getImage() {
+		return profilePicture;
+	}
 
 }

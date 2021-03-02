@@ -1,4 +1,4 @@
-package ir.darkdeveloper.sma.Configs.Security.JWT;
+package ir.darkdeveloper.sma.Utils;
 
 import java.util.Date;
 

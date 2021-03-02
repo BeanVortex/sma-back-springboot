@@ -18,20 +18,21 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import ir.darkdeveloper.sma.Configs.Security.JWT.Crud.RefreshModel;
 import ir.darkdeveloper.sma.Configs.Security.JWT.Crud.RefreshService;
-import ir.darkdeveloper.sma.Users.Service.UserService;
+import ir.darkdeveloper.sma.Utils.JwtUtils;
+import ir.darkdeveloper.sma.Utils.UserUtils;
 
 @Service
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
-    private final UserService userService;
-    private RefreshService refreshService;
+    private final UserUtils userUtils;
+    private final RefreshService refreshService;
 
     @Autowired
-    public JwtFilter(@Lazy JwtUtils jwtUtils, @Lazy UserService userService, RefreshService refreshService) {
+    public JwtFilter(@Lazy JwtUtils jwtUtils, @Lazy UserUtils userUtils, RefreshService refreshService) {
         this.jwtUtils = jwtUtils;
         this.refreshService = refreshService;
-        this.userService = userService;
+        this.userUtils = userUtils;
     }
 
     @Override
@@ -56,7 +57,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
                     if (username != null && auth == null) {
-                        UserDetails userDetails = userService.loadUserByUsername(username);
+                        UserDetails userDetails = userUtils.loadUserByUsername(username);
                         UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities());
                         SecurityContextHolder.getContext().setAuthentication(upToken);
@@ -65,10 +66,11 @@ public class JwtFilter extends OncePerRequestFilter {
                         refreshModel.setAccessToken(newAccessToken);
                         refreshModel.setRefreshToken(storedRefreshToken);
                         refreshModel.setUserId(userId);
-                        if (username.equals(userService.getAdminUsername())) {
-                            refreshModel.setId(refreshService.getIdByUserId(userService.getAdminId()));
+                        if (username.equals(userUtils.getAdminUsername())) {
+                            refreshModel.setId(refreshService.getIdByUserId(userUtils.getAdminId()));
                         } else {
-                            refreshModel.setId(refreshService.getIdByUserId(userService.getUserIdByUsernameOrEmail(username)));
+                            refreshModel.setId(
+                                    refreshService.getIdByUserId(userUtils.getUserIdByUsernameOrEmail(username)));
                         }
                         refreshService.saveToken(refreshModel);
                         response.addHeader("AccessToken", newAccessToken);
@@ -80,4 +82,15 @@ public class JwtFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
+    /*     public boolean userAdminEndpointCheck(HttpServletRequest request, UserDetails model){
+        String endPoint = request.getRequestURI();
+        switch(endPoint){
+            case "/api/user/role/":
+            return model.getAuthorities().contains(Authority.OP_ACCESS_ROLE);
+            case "/api/user/update/":
+            return model.getAuthorities().contains(Authority.OP_ACCESS_ROLE);
+        }
+    } */
+
 }

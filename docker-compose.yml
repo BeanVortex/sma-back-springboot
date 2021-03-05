@@ -1,0 +1,43 @@
+version: '3.3'
+
+services:
+  db:
+    image: 'postgres:13.1-alpine'
+    container_name: db
+    volumes: 
+      - $PWD:/data/db
+    environment:
+      - POSTGRES_USER=sma
+      - POSTGRES_PASSWORD=1234
+      # - POSTGRES_DB=sma
+      # - POSTGRES_DB_FILE=sma
+    networks:
+      - spring_postgres_sma
+    ports:
+      - "5435:5432"
+    secrets:
+      - sma-db-user
+      - sma-db-pass
+
+  app:
+    image: 'sma:latest'
+    build:
+      context: .
+    container_name: app
+    depends_on:
+      - db
+    networks:
+      - spring_postgres_sma
+    ports:
+      - "8080:8080"
+
+secrets:
+  sma-db-user:
+    external: true
+  sma-db-pass:
+    external: true
+
+networks:
+  spring_postgres_sma:
+    external:
+      true

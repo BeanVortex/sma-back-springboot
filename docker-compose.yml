@@ -1,4 +1,4 @@
-version: '3.3'
+version: '3.7'
 
 services:
   db:
@@ -7,8 +7,8 @@ services:
     volumes: 
       - $PWD:/data/db
     environment:
-      - POSTGRES_USER=sma
-      - POSTGRES_PASSWORD=1234
+      - POSTGRES_USER_FILE=/run/secrets/sma-db-user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/sma-db-password
       # - POSTGRES_DB=sma
       # - POSTGRES_DB_FILE=sma
     networks:
@@ -26,6 +26,9 @@ services:
     container_name: app
     depends_on:
       - db
+    secrets:
+      - sma-admin-user
+      - sma-admin-pass
     networks:
       - spring_postgres_sma
     ports:
@@ -35,6 +38,10 @@ secrets:
   sma-db-user:
     external: true
   sma-db-pass:
+    external: true
+  sma-admin-user:
+    external: true
+  sma-admin-pass:
     external: true
 
 networks:

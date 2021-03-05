@@ -5,9 +5,9 @@ server:
 spring:
     datasource:
         driver-class-name: org.postgresql.Driver
-        password: 1234
-        username: sma
-        url: jdbc:postgresql://db:5432/sma
+        username: ${docker-secret-sma-db-user}
+        password: ${docker-secret-sma-db-pass}
+        url: jdbc:postgresql://db:5432/${docker-secret-sma-db-user}
     jpa:
         hibernate:
             ddl-auto: update
@@ -20,10 +20,11 @@ spring:
         show-sql: true
     security:
         user:
-            name: dd
-            password: 1234
+            name: ${docker-secret-sma-admin-user}
+            password: ${docker-secret-sma-admin-password}
 docker-secret:
   bind-path: /run/secrets
+
 #server.ssl.key-store-type=JKS
 #server.ssl.key-store=classpath:keystore.jks
 #server.ssl.key-store-password=123456

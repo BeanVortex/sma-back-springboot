@@ -1,37 +1,37 @@
 jwt:
-    secretkey: secret
+  secretkey: RandomSecret
+jasypt:
+  encryptor:
+    algorithm: PBEWithMD5AndDES
+    iv-generator-classname: org.jasypt.iv.NoIvGenerator
 server:
-    port: 8080
+  port: 8080
 spring:
-    datasource:
-        driver-class-name: org.postgresql.Driver
-        username: ${docker-secret-sma-db-user}
-        password: ${docker-secret-sma-db-pass}
-        url: jdbc:postgresql://db:5432/${docker-secret-sma-db-user}
-    jpa:
-        hibernate:
-            ddl-auto: update
-            naming:
-                implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyHbmImpl
-                physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
-        properties:
-            hibernate:
-                dialect: org.hibernate.dialect.PostgreSQLDialect
-        show-sql: true
-    security:
-        user:
-            name: ${docker-secret-sma-admin-user}
-            password: ${docker-secret-sma-admin-password}
-docker-secret:
-  bind-path: /run/secrets
-
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    # url: 
+    # username: 
+    # password: 
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyHbmImpl
+        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+  security:
+    user:
+      name: ENC(FtbZbtmk067P2BDc97etuwJty9ccyZcV)
+      password: ENC(qhqssFHCJOkQW9GXHR75L3ZDnHa+llPp)
 #server.ssl.key-store-type=JKS
 #server.ssl.key-store=classpath:keystore.jks
 #server.ssl.key-store-password=123456
 #server.ssl.key-alias=tomcat
 #
 #security.require-ssl=true
-
 
 # jasypt.encryptor.algorithm=PBEWithMD5AndDES
 # jasypt.encryptor.iv-generator-classname=org.jasypt.iv.NoIvGenerator

@@ -126,4 +126,9 @@ public class UserService implements UserDetailsService {
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
+    @PreAuthorize("hasAnyAuthority('OP_ACCESS_ADMIN','OP_ACCESS_USER')")
+    public UserModel getUserInfo(UserModel model) {
+        return repo.findUserById(model.getId());
+    }
+
 }

@@ -1,18 +1,14 @@
+spring:
+  profiles.active: dev
+---
 jwt:
   secretkey: RandomSecret
-
 jasypt:
   encryptor:
     algorithm: PBEWithMD5AndDES
     iv-generator-classname: org.jasypt.iv.NoIvGenerator
-server:
-  port: 8080
 spring:
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: ${JDBC_DATABASE_URL}
-    username: ${JDBC_DATABASE_USERNAME}
-    password: ${JDBC_DATABASE_PASSWORD}
+  profiles: dev
   jpa:
     hibernate:
       ddl-auto: update
@@ -23,10 +19,19 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/sma
+    username: ENC(8AeVekzcG3bqedcrXfmGUssZ+JgDZ3KZ)
+    password: ENC(OX8AtHJIuZrRUmZPbcpVmg==)
   security:
     user:
-      name: ENC(FtbZbtmk067P2BDc97etuwJty9ccyZcV)
-      password: ENC(qhqssFHCJOkQW9GXHR75L3ZDnHa+llPp)
+      name: ENC(dpTYO6+jxn/Ngh4UM7rGJ5PGv+RD2Ppr)
+      password: ENC(QHPFemb4j36GWT3oY507nw==)
+
+
+server:
+  port: 8080
 # docker-secret:
 #   bind-path: /run/secrets
 

@@ -33,8 +33,8 @@ public class UserController {
     }
 
     @PostMapping("/signup/")
-    public ResponseEntity<?> signUpUser(@ModelAttribute UserModel user, HttpServletResponse response) {
-        return userService.signUpUser(user, response);
+    public ResponseEntity<?> signUpUser(@ModelAttribute UserModel model, HttpServletResponse response) {
+        return userService.signUpUser(model, response);
     }
 
     @PostMapping("/login/")
@@ -43,18 +43,23 @@ public class UserController {
     }
 
     @PostMapping("/update/")
-    public UserModel updateUser(@ModelAttribute UserModel user) {
-        return userService.updateUser(user);
+    public UserModel updateUser(@ModelAttribute UserModel model) {
+        return userService.updateUser(model);
     }
 
 
     @DeleteMapping("/")
-    public ResponseEntity<?> deleteUser(@RequestBody UserModel user) {
-        return userService.deleteUser(user);
+    public ResponseEntity<?> deleteUser(@RequestBody UserModel model) {
+        return userService.deleteUser(model);
+    }
+
+    @GetMapping("/all/")
+    public Page<UserModel> allUsers(Pageable pageable) {
+        return userService.allUsers(pageable);
     }
 
     @GetMapping("/")
-    public Page<UserModel> allUsers(Pageable pageable) {
-        return userService.allUsers(pageable);
+    public UserModel getUserInfo(@RequestBody UserModel model){
+        return userService.getUserInfo(model);
     }
 }

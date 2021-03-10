@@ -21,23 +21,20 @@ import ir.darkdeveloper.sma.Users.Models.Authority;
 import ir.darkdeveloper.sma.Users.Models.UserModel;
 import ir.darkdeveloper.sma.Users.Repo.UserRepo;
 import ir.darkdeveloper.sma.Utils.IOUtils;
-import ir.darkdeveloper.sma.Utils.UserUtils;
 
 @Service
 public class PostService {
 
     private final PostRepo postRepo;
     private final UserRepo userRepo;
-    private final UserUtils userUtils;
     private final IOUtils ioUtils;
     private final String path = "posts/";
     private Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
     @Autowired
-    public PostService(PostRepo postRepo, UserRepo userRepo, UserUtils userUtils, IOUtils ioUtils) {
+    public PostService(PostRepo postRepo, UserRepo userRepo, IOUtils ioUtils) {
         this.postRepo = postRepo;
         this.userRepo = userRepo;
-        this.userUtils = userUtils;
         this.ioUtils = ioUtils;
     }
 

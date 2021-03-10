@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import ir.darkdeveloper.sma.Post.Models.PostModel;
 import ir.darkdeveloper.sma.Post.Repo.PostRepo;
+import ir.darkdeveloper.sma.Users.Models.Authority;
 import ir.darkdeveloper.sma.Users.Models.UserModel;
 import ir.darkdeveloper.sma.Users.Repo.UserRepo;
 import ir.darkdeveloper.sma.Utils.IOUtils;
@@ -96,8 +97,7 @@ public class PostService {
     @Transactional
     public ResponseEntity<?> deletePost(PostModel post) {
         UserModel userModel = userRepo.findUserById(postRepo.findById(post.getId().intValue()).getUser().getId());
-        // TODO delete admin access on production
-        if (auth.getName().equals(userModel.getEmail()) || auth.getName().equals(userUtils.getAdminUsername())) {
+        if (auth.getName().equals(userModel.getEmail()) || auth.getAuthorities().contains(Authority.OP_DELETE_POST)) {
             try {
                 PostModel model = postRepo.findById(post.getId().intValue());
 

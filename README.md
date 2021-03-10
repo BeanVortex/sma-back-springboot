@@ -143,3 +143,98 @@ Example:
 ---
 
 ## Posts
+
+> Posts All: By ``GET`` requesting to this api you will get all the posts listed in pagination format
+
+```
+/api/post/
+```
+You can also pass some pagination variables in the url to filter posts
+
+---
+
+> Posts Create: Use __FORM DATA__ and `POST` method
+
+```
+/api/post/
+```
+also send ``user_id``
+
+---
+
+> Posts Delete: Only admin with ``OP_DELETE_POST` and the actual user can delete
+
+```
+/api/post/{id}/
+```
+
+---
+
+> Posts `GET` one: 
+
+```
+/api/post/{id}/
+```
+
+---
+
+> Posts search:  `GET` method. pass title(required) and content in url
+
+```
+/api/post/search/?title=<your title>&content=<your contetn>
+```
+
+---
+---
+
+## Comments
+
+> Comments Create: Use `POST` method using json body to save a new comment
+
+```
+/api/post/comment/
+```
+
+Example:
+
+```json
+{
+  "content": "string",
+  "post": {
+    "id" : 0
+  }
+}
+```
+
+* Remember to send post id
+  
+---
+
+> Comments Delete: Only actual user and the admin with `OP_DELETE_COMMENT` authority can delete comment. Use `DELETE` method
+
+```
+/api/post/comment/
+```
+
+Example:
+
+```json
+{
+  "id": 0,
+  "post": {
+    "id": 0
+  }
+}
+```
+
+---
+---
+---
+
+# Final words 
+
+Hope it's useful. To contact me on Instagram or Telegram use these links
+
+[Telegram](https://t.me/plantdg)
+
+[Instagram](https://instagram/darkdeveloper2/?igshid=38776le23g1w)

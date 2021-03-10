@@ -14,7 +14,9 @@ public enum Authority implements GrantedAuthority {
     OP_ACCESS_USER,
     OP_EDIT_USER,
     OP_DELETE_USER,
-    OP_ADD_USER;
+    OP_ADD_USER,
+    OP_DELETE_POST,
+    OP_DELETE_COMMENT;
 
     @Override
     public String getAuthority() {

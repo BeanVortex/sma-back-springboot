@@ -26,8 +26,8 @@ spring:
     password: ENC(xfn81YkT6KEXvhNQOI+JpvlT2LtMopCQOoTBuPDlFm/OZ+oGZAE+uN13SIW0hYkAQycaRDGhNsoikTfpXCAp+FLNWFXVeFPqqTvOqOkizpk=)
   security:
     user:
-      name: ENC(/55hbyre+yE5tb6zA6YyVBgzX/XuHIMn)
-      password: ENC(VWX85f0hui4cpUTQp7/48A==)
+      name: ENC(1hak+QtSRqr4mBHZJYSx2mUT8bchOLpf)
+      password: ENC(G1d9E+0lFVNTXE6CYoATcA==)
 
 
 server:

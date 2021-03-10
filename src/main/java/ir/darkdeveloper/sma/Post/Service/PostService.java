@@ -43,37 +43,43 @@ public class PostService {
     @Transactional
     @PreAuthorize("authentication.name != 'anonymousUser'")
     public ResponseEntity<?> savePost(PostModel model) {
-        try {
-            // For updating Post img by deleting previous img and replacing with new one and
-            // new name
+        if (auth.getName().equals(userRepo.findUserById(model.getUser().getId()).getEmail())
+                || auth.getName().equals(userRepo.findUserById(model.getUser().getId()).getUserName())) {
 
-            PostModel preModel = postRepo.findById(model.getId());
-            if (model.getId() != null && model.getFile() != null) {
-                Files.delete(Paths.get(ioUtils.getImagePath(preModel, path)));
-            }
-            // in case when updated with no img and then updating with img
-            if (preModel != null && preModel.getImage() != null) {
-                model.setImage(preModel.getImage());
-            }
+            try {
+                // For updating Post img by deleting previous img and replacing with new one and
+                // new name
 
-            String fileName = ioUtils.saveFile(model.getFile(), path);
-            if (fileName != null) {
-                model.setImage(fileName);
-            }
-            postRepo.save(model);
-            return new ResponseEntity<>(HttpStatus.OK);
+                PostModel preModel = postRepo.findById(model.getId().intValue());
+                if (model.getId() != null && model.getFile() != null) {
+                    Files.delete(Paths.get(ioUtils.getImagePath(preModel, path)));
+                }
+                // in case when updated with no img and then updating with img
+                if (preModel != null && preModel.getImage() != null) {
+                    model.setImage(preModel.getImage());
+                }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+                String fileName = ioUtils.saveFile(model.getFile(), path);
+                if (fileName != null) {
+                    model.setImage(fileName);
+                }
+                postRepo.save(model);
+                return new ResponseEntity<>(HttpStatus.OK);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
         }
+        return new ResponseEntity<>("You can't do this action", HttpStatus.FORBIDDEN);
     }
 
+    // TODO
     @PreAuthorize("authentication.name != 'anonymousUser'")
     public ResponseEntity<?> newLike(PostModel model) {
 
         Long id = model.getId();
-        PostModel model2 = postRepo.findById(id);
+        PostModel model2 = postRepo.findById(id.intValue());
         Long likes = model2.getLikes();
         model2.setLikes(++likes);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -89,28 +95,27 @@ public class PostService {
 
     @Transactional
     public ResponseEntity<?> deletePost(PostModel post) {
-        try {
-            UserModel userModel = userRepo.findUserById(postRepo.findById(post.getId()).getUser().getId());
-            PostModel model = postRepo.findById(post.getId());
+        UserModel userModel = userRepo.findUserById(postRepo.findById(post.getId().intValue()).getUser().getId());
+        // TODO delete admin access on production
+        if (auth.getName().equals(userModel.getEmail()) || auth.getName().equals(userUtils.getAdminUsername())) {
+            try {
+                PostModel model = postRepo.findById(post.getId().intValue());
 
-            // TODO delete admin access on production
-
-            if (auth.getName().equals(userModel.getEmail()) || auth.getName().equals(userUtils.getAdminUsername())) {
                 Files.delete(Paths.get(ioUtils.getImagePath(model, path)));
                 postRepo.deleteById(post.getId());
                 return new ResponseEntity<>(HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("You can't do this action", HttpStatus.FORBIDDEN);
-            }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
+        } else {
+            return new ResponseEntity<>("You can't do this action", HttpStatus.FORBIDDEN);
         }
     }
 
     public PostModel getOnePost(Long id) {
-        return postRepo.findById(id);
+        return postRepo.findById(id.intValue());
     }
 
 }

@@ -21,6 +21,7 @@ public class CommentService {
     private final PostRepo postRepo;
     private final UserRepo userRepo;
     private final UserUtils userUtils;
+    private Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
     @Autowired
     public CommentService(CommentRepo commentRepo, PostRepo postRepo, UserRepo userRepo, UserUtils userUtils) {
@@ -30,17 +31,11 @@ public class CommentService {
         this.userUtils = userUtils;
     }
 
+    @PreAuthorize("authentication.name != 'anonymousUser'")
     public ResponseEntity<?> saveComment(CommentModel model) {
         try {
-            UserModel userModel = userRepo.findUserById(postRepo.findById(model.getPost().getId().intValue()).getUser().getId());
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            //TODO delete admin access on production
-            if (auth.getName().equals(userModel.getEmail()) || auth.getName().equals(userUtils.getAdminUsername())){
-                commentRepo.save(model);
-                return new ResponseEntity<>(HttpStatus.OK);
-            }else {
-                return new ResponseEntity<>("You can't do this action", HttpStatus.FORBIDDEN);
-            }
+            commentRepo.save(model);
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -48,19 +43,19 @@ public class CommentService {
     }
 
     public ResponseEntity<?> deleteComment(CommentModel comment) {
-        try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            UserModel userModel = userRepo.findUserById(postRepo.findById(comment.getPost().getId().intValue()).getUser().getId());
-            if (auth.getName().equals(userModel.getEmail()) || auth.getName().equals(userUtils.getAdminUsername())) {
+        UserModel userModel = userRepo
+                .findUserById(postRepo.findById(comment.getPost().getId().intValue()).getUser().getId());
+        if (auth.getName().equals(userModel.getEmail()) || auth.getName().equals(userUtils.getAdminUsername())) {
+            try {
                 commentRepo.deleteById(Long.valueOf(comment.getId()));
                 return new ResponseEntity<>(HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("You can't do this action", HttpStatus.FORBIDDEN);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
+        return new ResponseEntity<>("You can't do this action", HttpStatus.FORBIDDEN);
+
     }
 
     //TODO

@@ -47,7 +47,7 @@ public class PostService {
             // For updating Post img by deleting previous img and replacing with new one and
             // new name
 
-            PostModel preModel = postRepo.findById(model.getId());
+            PostModel preModel = postRepo.findById(model.getId().intValue());
             if (model.getId() != null && model.getFile() != null) {
                 Files.delete(Paths.get(ioUtils.getImagePath(preModel, path)));
             }
@@ -69,11 +69,12 @@ public class PostService {
         }
     }
 
+    // TODO
     @PreAuthorize("authentication.name != 'anonymousUser'")
     public ResponseEntity<?> newLike(PostModel model) {
 
         Long id = model.getId();
-        PostModel model2 = postRepo.findById(id);
+        PostModel model2 = postRepo.findById(id.intValue());
         Long likes = model2.getLikes();
         model2.setLikes(++likes);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -90,8 +91,8 @@ public class PostService {
     @Transactional
     public ResponseEntity<?> deletePost(PostModel post) {
         try {
-            UserModel userModel = userRepo.findUserById(postRepo.findById(post.getId()).getUser().getId());
-            PostModel model = postRepo.findById(post.getId());
+            UserModel userModel = userRepo.findUserById(postRepo.findById(post.getId().intValue()).getUser().getId());
+            PostModel model = postRepo.findById(post.getId().intValue());
 
             // TODO delete admin access on production
 
@@ -110,7 +111,7 @@ public class PostService {
     }
 
     public PostModel getOnePost(Long id) {
-        return postRepo.findById(id);
+        return postRepo.findById(id.intValue());
     }
 
 }

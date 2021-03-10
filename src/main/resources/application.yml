@@ -1,18 +1,14 @@
+spring:
+  profiles.active: dev
+---
 jwt:
   secretkey: RandomSecret
-
 jasypt:
   encryptor:
     algorithm: PBEWithMD5AndDES
     iv-generator-classname: org.jasypt.iv.NoIvGenerator
-server:
-  port: 8080
 spring:
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgres://ENC(GGK8xwj35pJ2wuUnNfn3QhGeOGABIefk):ENC(6hGBlQnMpIekhMF7CkiB21lLNMbQL9tptHrQ4Oy5/oy/mhjF7Q+gkYJahpM2aA7OsnGbhf0peiP45E3OZeIRcRggiM+QxGeRfNj9mmEtzeI=)@ec2-54-196-111-158.compute-1.amazonaws.com:5432/ENC(B81X8/K+6+EYONTwDBkb5uNxzZcWxFKh)
-    username: ENC(GGK8xwj35pJ2wuUnNfn3QhGeOGABIefk)
-    password: ENC(6hGBlQnMpIekhMF7CkiB21lLNMbQL9tptHrQ4Oy5/oy/mhjF7Q+gkYJahpM2aA7OsnGbhf0peiP45E3OZeIRcRggiM+QxGeRfNj9mmEtzeI=)
+  profiles: dev
   jpa:
     hibernate:
       ddl-auto: update
@@ -23,10 +19,19 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://ec2-108-128-104-50.eu-west-1.compute.amazonaws.com:5432/degqau050v0nbq
+    username: ENC(e1dnM2MRtbVfwZZq3ZbLHTKzgtMZScpB)
+    password: ENC(xfn81YkT6KEXvhNQOI+JpvlT2LtMopCQOoTBuPDlFm/OZ+oGZAE+uN13SIW0hYkAQycaRDGhNsoikTfpXCAp+FLNWFXVeFPqqTvOqOkizpk=)
   security:
     user:
-      name: ENC(FtbZbtmk067P2BDc97etuwJty9ccyZcV)
-      password: ENC(qhqssFHCJOkQW9GXHR75L3ZDnHa+llPp)
+      name: ENC(/55hbyre+yE5tb6zA6YyVBgzX/XuHIMn)
+      password: ENC(VWX85f0hui4cpUTQp7/48A==)
+
+
+server:
+  port: 8080
 # docker-secret:
 #   bind-path: /run/secrets
 

@@ -1,14 +1,12 @@
 package ir.darkdeveloper.sma.Main;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
-@CrossOrigin("*")
+@Controller
 public class MainController {
 
-    @RequestMapping("/api")
+    @RequestMapping("/")
     public String index() {
         return "index";
     }

@@ -3,6 +3,7 @@ package ir.darkdeveloper.sma.Post.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class CommentService {
 
     public ResponseEntity<?> saveComment(CommentModel model) {
         try {
-            UserModel userModel = userRepo.findUserById(postRepo.findById(model.getPost().getId()).getUser().getId());
+            UserModel userModel = userRepo.findUserById(postRepo.findById(model.getPost().getId().intValue()).getUser().getId());
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             //TODO delete admin access on production
             if (auth.getName().equals(userModel.getEmail()) || auth.getName().equals(userUtils.getAdminUsername())){
@@ -49,7 +50,7 @@ public class CommentService {
     public ResponseEntity<?> deleteComment(CommentModel comment) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            UserModel userModel = userRepo.findUserById(postRepo.findById(comment.getPost().getId()).getUser().getId());
+            UserModel userModel = userRepo.findUserById(postRepo.findById(comment.getPost().getId().intValue()).getUser().getId());
             if (auth.getName().equals(userModel.getEmail()) || auth.getName().equals(userUtils.getAdminUsername())) {
                 commentRepo.deleteById(Long.valueOf(comment.getId()));
                 return new ResponseEntity<>(HttpStatus.OK);
@@ -62,8 +63,14 @@ public class CommentService {
         }
     }
 
-    /*
-     * public Page<CommentModel> commentsOfPost(String id, Pageable pageable){
-     * return repo.findByPost(id, pageable); }
-     */
+    //TODO
+    @PreAuthorize("authentication.name != 'anonymousUser'")
+    public ResponseEntity<?> newLike(CommentModel model) {
+        Long id = model.getId();
+        CommentModel model2 = commentRepo.findById(id.intValue());
+        Long likes = model2.getLikes();
+        model2.setLikes(++likes);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 }

@@ -144,8 +144,7 @@ Example:
 
 ## Posts
 
-<<<<<<< HEAD
-=======
+
 > Posts All: By ``GET`` requesting to this api you will get all the posts listed in pagination format
 
 ```
@@ -240,4 +239,3 @@ Hope it's useful. To contact me on Instagram or Telegram use these links
 [Telegram](https://t.me/plantdg)
 
 [Instagram](https://instagram/darkdeveloper2/?igshid=38776le23g1w)
->>>>>>> master

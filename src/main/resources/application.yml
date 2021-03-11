@@ -21,9 +21,9 @@ spring:
     show-sql: true
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://ec2-108-128-104-50.eu-west-1.compute.amazonaws.com:5432/degqau050v0nbq
-    username: ENC(e1dnM2MRtbVfwZZq3ZbLHTKzgtMZScpB)
-    password: ENC(xfn81YkT6KEXvhNQOI+JpvlT2LtMopCQOoTBuPDlFm/OZ+oGZAE+uN13SIW0hYkAQycaRDGhNsoikTfpXCAp+FLNWFXVeFPqqTvOqOkizpk=)
+    url: jdbc:postgresql://ec2-34-203-255-149.compute-1.amazonaws.com:5432/d3jq82foah2oid
+    username: ENC(Hpacqatq2x3Qhu7uNrhlHHjYRoTfnDCE)
+    password: ENC(YJTQacsZWHU27+0oS+bjiHb4+peLmplvMY1aSiYYm6roveR+E/rTAnAj9jDPZHhqxnJaTCSJJOTtBmn/St9ftGYyrMicxjA+8yT8s/cr5+Q=)
   security:
     user:
       name: ENC(1hak+QtSRqr4mBHZJYSx2mUT8bchOLpf)

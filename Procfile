@@ -1,1 +1,1 @@
-web: java -Djasypt.encryptor.password=ChangeMe -jar build/libs/*.war
+web: java -Dserver.port=$PORT $JAVA_OPTS -Djasypt.encryptor.password=ChangeMe -jar build/libs/*.war

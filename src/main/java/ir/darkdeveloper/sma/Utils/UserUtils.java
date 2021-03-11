@@ -127,7 +127,7 @@ public class UserUtils {
             GrantedAuthority[] authorities = { Authority.OP_ACCESS_ADMIN, Authority.OP_EDIT_ADMIN,
                     Authority.OP_ADD_ADMIN, Authority.OP_DELETE_ADMIN, Authority.OP_ACCESS_USER, Authority.OP_EDIT_USER,
                     Authority.OP_DELETE_USER, Authority.OP_ADD_USER, Authority.OP_ADD_ROLE, Authority.OP_DELETE_ROLE,
-                    Authority.OP_ACCESS_ROLE };
+                    Authority.OP_ACCESS_ROLE, Authority.OP_DELETE_POST, Authority.OP_DELETE_COMMENT };
             return (UserDetails) User.builder()
                     .username(getAdminUsername())
                     .password(encoder.encode(getAdminPassword()))

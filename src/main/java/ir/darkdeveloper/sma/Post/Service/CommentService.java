@@ -11,24 +11,22 @@ import org.springframework.stereotype.Service;
 import ir.darkdeveloper.sma.Post.Models.CommentModel;
 import ir.darkdeveloper.sma.Post.Repo.CommentRepo;
 import ir.darkdeveloper.sma.Post.Repo.PostRepo;
+import ir.darkdeveloper.sma.Users.Models.Authority;
 import ir.darkdeveloper.sma.Users.Models.UserModel;
 import ir.darkdeveloper.sma.Users.Repo.UserRepo;
-import ir.darkdeveloper.sma.Utils.UserUtils;
 
 @Service
 public class CommentService {
     private final CommentRepo commentRepo;
     private final PostRepo postRepo;
     private final UserRepo userRepo;
-    private final UserUtils userUtils;
     private Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
     @Autowired
-    public CommentService(CommentRepo commentRepo, PostRepo postRepo, UserRepo userRepo, UserUtils userUtils) {
+    public CommentService(CommentRepo commentRepo, PostRepo postRepo, UserRepo userRepo) {
         this.commentRepo = commentRepo;
         this.postRepo = postRepo;
         this.userRepo = userRepo;
-        this.userUtils = userUtils;
     }
 
     @PreAuthorize("authentication.name != 'anonymousUser'")
@@ -45,7 +43,9 @@ public class CommentService {
     public ResponseEntity<?> deleteComment(CommentModel comment) {
         UserModel userModel = userRepo
                 .findUserById(postRepo.findById(comment.getPost().getId().intValue()).getUser().getId());
-        if (auth.getName().equals(userModel.getEmail()) || auth.getName().equals(userUtils.getAdminUsername())) {
+
+        if (auth.getName().equals(userModel.getEmail())
+                || auth.getAuthorities().contains(Authority.OP_DELETE_COMMENT)) {
             try {
                 commentRepo.deleteById(Long.valueOf(comment.getId()));
                 return new ResponseEntity<>(HttpStatus.OK);

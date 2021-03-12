@@ -43,6 +43,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String refreshToken = request.getHeader("RefreshToken");
         String accessToken = request.getHeader("AccessToken");
         String user_id = request.getHeader("UserId");
+        response.setHeader("Access-Control-Expose-Headers", "AccessToken, RefreshToken");
 
         if (user_id != null) {
             Long userId = Long.parseLong(user_id);

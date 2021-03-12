@@ -17,7 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
-import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 import ir.darkdeveloper.sma.Configs.Security.JWT.JwtFilter;
 import ir.darkdeveloper.sma.Users.Service.UserService;
@@ -76,7 +75,7 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
 
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.setAllowedOrigins(Arrays.asList("*", "http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(
                 Arrays.asList("X-Requested-With", "Origin", "Content-Type", "Accept", "AccessToken", "RefreshToken"));

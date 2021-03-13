@@ -19,16 +19,17 @@ public class JwtUtils {
     @Value("${jwt.secretkey}")
     private String secret;
 
-    private final PasswordEncoder encoder;
+    // private final PasswordEncoder encoder;
 
-    @Autowired
-    public JwtUtils(PasswordEncoder encoder) {
-        this.encoder = encoder;
-    }
+    // @Autowired
+    // public JwtUtils(PasswordEncoder encoder) {
+    //     this.encoder = encoder;
+    // }
 
     @PostConstruct
     public void initSecret(){
-        secret = encoder.encode(secret);
+        //  TODO
+       // secret = encoder.encode(secret);
     }
 
     //refresh token is used to generate access token

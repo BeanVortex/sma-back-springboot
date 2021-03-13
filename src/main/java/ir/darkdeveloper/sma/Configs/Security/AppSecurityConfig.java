@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -54,6 +55,13 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
             CorsConfigurationSource config = req -> {
                 CorsConfiguration cc = new CorsConfiguration();
                 cc.setAllowedOrigins(List.of("*"));
+                cc.addAllowedOrigin("*");
+                cc.addAllowedHeader("Access-Control-Allow-Origin");
+                cc.addAllowedHeader("AccessToken");
+                cc.addAllowedHeader("RefreshToken");
+                cc.addAllowedMethod(HttpMethod.POST);
+                cc.addAllowedMethod(HttpMethod.GET);
+                cc.addAllowedMethod(HttpMethod.DELETE);
                 cc.setAllowedHeaders(List.of("Access-Control-Allow-Origin", "AccessToken", "RefreshToken"));
                 cc.setAllowedMethods(List.of("GET", "POST", "DELETE"));
                 return cc;

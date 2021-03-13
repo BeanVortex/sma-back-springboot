@@ -1,5 +1,7 @@
 package ir.darkdeveloper.sma.Configs.Security;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +15,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 import ir.darkdeveloper.sma.Configs.Security.JWT.JwtFilter;
 import ir.darkdeveloper.sma.Users.Service.UserService;
@@ -42,12 +46,20 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
                 // .and()
                 // .formLogin()
                 .and()
-                .cors()
-                .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                http.cors(corsCustomizer -> {
+                    CorsConfigurationSource config = req -> {
+                        CorsConfiguration cc = new CorsConfiguration();
+                        cc.setAllowedOrigins(List.of("*"));
+                        cc.setAllowedHeaders(List.of("AccessToken", "RefreshToken"));
+                        cc.setAllowedMethods(List.of("GET", "POST", "DELETE"));
+                        return cc;
+                    };
+                    corsCustomizer.configurationSource(config);
+                });
     }
 
     @Override

@@ -50,16 +50,16 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-                http.cors(corsCustomizer -> {
-                    CorsConfigurationSource config = req -> {
-                        CorsConfiguration cc = new CorsConfiguration();
-                        cc.setAllowedOrigins(List.of("*"));
-                        cc.setAllowedHeaders(List.of("AccessToken", "RefreshToken"));
-                        cc.setAllowedMethods(List.of("GET", "POST", "DELETE"));
-                        return cc;
-                    };
-                    corsCustomizer.configurationSource(config);
-                });
+        http.cors(corsCustomizer -> {
+            CorsConfigurationSource config = req -> {
+                CorsConfiguration cc = new CorsConfiguration();
+                cc.setAllowedOrigins(List.of("*"));
+                cc.setAllowedHeaders(List.of("Access-Control-Allow-Origin", "AccessToken", "RefreshToken"));
+                cc.setAllowedMethods(List.of("GET", "POST", "DELETE"));
+                return cc;
+            };
+            corsCustomizer.configurationSource(config);
+        });
     }
 
     @Override
@@ -77,5 +77,5 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
     public PasswordEncoder passEncode() {
         return new BCryptPasswordEncoder(12);
     }
-    
+
 }

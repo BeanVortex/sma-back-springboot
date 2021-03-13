@@ -97,7 +97,7 @@ public class UserService implements UserDetailsService {
                     userUtils.authenticateUser(model, userUtils.getUserIdByUsernameOrEmail(model.getUsername()), null,
                             response);
                 }
-                return new ResponseEntity<>(repo.findByEmailOrUsername(model.getUsername()), HttpStatus.OK);
+                return ResponseEntity.ok().body(repo.findByEmailOrUsername(model.getUsername()));
             } catch (Exception e) {
                 return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
             }
@@ -118,7 +118,7 @@ public class UserService implements UserDetailsService {
                 jwtAuth.setUsername(model.getEmail());
                 jwtAuth.setPassword(model.getPassword());
                 userUtils.authenticateUser(jwtAuth, model.getId(), rawPass, response);
-                return new ResponseEntity<>(repo.findByEmailOrUsername(model.getUsername()), HttpStatus.OK);
+                return ResponseEntity.ok().body(repo.findByEmailOrUsername(model.getUsername()));
             } catch (Exception e) {
                 return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
             }

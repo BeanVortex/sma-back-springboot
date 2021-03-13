@@ -1,12 +1,11 @@
 package ir.darkdeveloper.sma.Configs.Security;
 
-import java.util.List;
+import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -18,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import ir.darkdeveloper.sma.Configs.Security.JWT.JwtFilter;
 import ir.darkdeveloper.sma.Users.Service.UserService;
@@ -39,6 +39,8 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf()
                 .disable()
+                .cors()
+                .and()
                 .authorizeRequests()
                 .antMatchers("/", "/api/user/signup/", "/api/user/login/")
                 .permitAll()
@@ -51,23 +53,6 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-        http.cors(corsCustomizer -> {
-            CorsConfigurationSource config = req -> {
-                CorsConfiguration cc = new CorsConfiguration();
-                cc.setAllowedOrigins(List.of("*"));
-                cc.addAllowedOrigin("*");
-                cc.addAllowedHeader("Access-Control-Allow-Origin");
-                cc.addAllowedHeader("AccessToken");
-                cc.addAllowedHeader("RefreshToken");
-                cc.addAllowedMethod(HttpMethod.POST);
-                cc.addAllowedMethod(HttpMethod.GET);
-                cc.addAllowedMethod(HttpMethod.DELETE);
-                cc.setAllowedHeaders(List.of("Access-Control-Allow-Origin", "AccessToken", "RefreshToken"));
-                cc.setAllowedMethods(List.of("GET", "POST", "DELETE"));
-                return cc;
-            };
-            corsCustomizer.configurationSource(config);
-        });
     }
 
     @Override
@@ -86,4 +71,14 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder(12);
     }
 
+    @Bean
+	CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedOrigins(Arrays.asList("*"));
+		configuration.setAllowedMethods(Arrays.asList("GET","POST"));
+        configuration.setAllowedHeaders(Arrays.asList( "AccessToken", "RefreshToken"));
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
+	}
 }

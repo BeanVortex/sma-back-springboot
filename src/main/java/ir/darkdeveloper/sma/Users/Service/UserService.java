@@ -97,7 +97,7 @@ public class UserService implements UserDetailsService {
                     userUtils.authenticateUser(model, userUtils.getUserIdByUsernameOrEmail(model.getUsername()), null,
                             response);
                 }
-                return ResponseEntity.ok().body(repo.findByEmailOrUsername(model.getUsername()));
+                return new ResponseEntity<>(repo.findByEmailOrUsername(model.getUsername()), HttpStatus.OK);
             } catch (Exception e) {
                 return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
             }
@@ -109,7 +109,7 @@ public class UserService implements UserDetailsService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication.getName().equals("anonymousUser")
                 || authentication.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
-                || authentication.getName().equals(model.getEmail())) {
+                || !authentication.getName().equals(model.getEmail())) {
             try {
                 String rawPass = model.getPassword();
                 userUtils.validateUserData(model);
@@ -118,7 +118,7 @@ public class UserService implements UserDetailsService {
                 jwtAuth.setUsername(model.getEmail());
                 jwtAuth.setPassword(model.getPassword());
                 userUtils.authenticateUser(jwtAuth, model.getId(), rawPass, response);
-                return ResponseEntity.ok().body(repo.findByEmailOrUsername(model.getUsername()));
+                return new ResponseEntity<>(repo.findByEmailOrUsername(model.getUsername()), HttpStatus.OK);
             } catch (Exception e) {
                 return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
             }

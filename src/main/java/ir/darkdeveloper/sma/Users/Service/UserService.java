@@ -109,7 +109,7 @@ public class UserService implements UserDetailsService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication.getName().equals("anonymousUser")
                 || authentication.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
-                || authentication.getName().equals(model.getEmail())) {
+                || !authentication.getName().equals(model.getEmail())) {
             try {
                 String rawPass = model.getPassword();
                 userUtils.validateUserData(model);

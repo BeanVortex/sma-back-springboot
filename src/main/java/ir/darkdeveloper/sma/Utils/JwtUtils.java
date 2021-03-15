@@ -4,9 +4,7 @@ import java.util.Date;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;
@@ -64,7 +62,7 @@ public class JwtUtils {
         return expiration.before(new Date());
     }
 
-    private Date getExpirationDate(String token) {
+    public Date getExpirationDate(String token) {
         return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getExpiration();
     }
 

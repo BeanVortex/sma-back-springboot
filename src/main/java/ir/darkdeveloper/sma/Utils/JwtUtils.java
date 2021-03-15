@@ -63,7 +63,7 @@ public class JwtUtils {
         return expiration.before(new Date());
     }
 
-    private Date getExpirationDate(String token) {
+    public Date getExpirationDate(String token) {
         return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getExpiration();
     }
 

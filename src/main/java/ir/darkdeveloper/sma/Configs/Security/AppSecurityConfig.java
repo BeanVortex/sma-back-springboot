@@ -71,14 +71,14 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-	CorsConfigurationSource corsConfigurationSource() {
-		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(Arrays.asList("*"));
-        configuration.addExposedHeader("AccessToken, RefreshToken");
-		configuration.setAllowedMethods(Arrays.asList("GET","POST", "DELETE"));
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.addExposedHeader("AccessToken, RefreshToken, Expiration");
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.registerCorsConfiguration("/**", configuration);
-		return source;
-	}
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 }

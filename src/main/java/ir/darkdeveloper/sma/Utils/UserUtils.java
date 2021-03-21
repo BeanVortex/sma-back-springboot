@@ -78,9 +78,9 @@ public class UserUtils {
             rModel.setUserId(getUserIdByUsernameOrEmail(username));
         }
         refreshService.saveToken(rModel);
-        response.addHeader("AccessToken", accessToken);
-        response.addHeader("RefreshToken", refreshToken);
-        response.addHeader("Expiration", jwtUtils.getExpirationDate(refreshToken).toString());
+        response.addHeader("access_token", accessToken);
+        response.addHeader("refresh_token", refreshToken);
+        response.addHeader("expiration", jwtUtils.getExpirationDate(refreshToken).toString());
     }
 
     public void validateUserData(UserModel model) throws FileNotFoundException, IOException, Exception {

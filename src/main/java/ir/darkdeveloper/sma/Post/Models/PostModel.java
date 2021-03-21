@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -51,7 +52,7 @@ public class PostModel implements ImageUtil {
 
   private String image;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.EAGER)
   // @JoinTable(joinColumns = @JoinColumn(name = "post_id", referencedColumnName = "id"),
   //  inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"))
   @JoinColumn(name = "user_id", referencedColumnName = "id")

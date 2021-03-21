@@ -111,6 +111,9 @@ public class UserService implements UserDetailsService {
                 || authentication.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
                 || !authentication.getName().equals(model.getEmail())) {
             try {
+                if (model.getUserName().equals(userUtils.getAdminUsername())){
+                    return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+                }
                 String rawPass = model.getPassword();
                 userUtils.validateUserData(model);
                 repo.save(model);

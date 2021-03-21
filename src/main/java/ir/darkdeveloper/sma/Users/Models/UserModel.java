@@ -64,8 +64,7 @@ public class UserModel implements UserDetails, ImageUtil {
     private String profilePicture;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
-     inverseJoinColumns = @JoinColumn(name = "role", referencedColumnName = "name"))
+    @JoinTable(joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role", referencedColumnName = "name"))
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private List<UserRoles> roles;
 
@@ -77,7 +76,7 @@ public class UserModel implements UserDetails, ImageUtil {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy="user", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<PostModel> posts;
 
     @Override
@@ -111,7 +110,7 @@ public class UserModel implements UserDetails, ImageUtil {
     public boolean isAccountNonExpired() {
         return true;
     }
-    
+
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public boolean isAccountNonLocked() {
@@ -130,9 +129,9 @@ public class UserModel implements UserDetails, ImageUtil {
         return this.getEnabled();
     }
 
-	@Override
-	public String getImage() {
-		return profilePicture;
-	}
+    @Override
+    public String getImage() {
+        return profilePicture;
+    }
 
 }

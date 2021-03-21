@@ -13,10 +13,13 @@ public class SmaApplication {
         SpringApplication.run(SmaApplication.class, args);
     }
 
+
+
     public static void disableWarning() {
         System.err.close();
         System.setErr(System.out);
     }
+
 
 }
 

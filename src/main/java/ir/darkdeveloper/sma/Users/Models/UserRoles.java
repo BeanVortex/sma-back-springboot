@@ -36,4 +36,18 @@ public class UserRoles implements Serializable {
     @CollectionTable(name="authorities", joinColumns=@JoinColumn(name="role_id", referencedColumnName="id"))
     @Enumerated(EnumType.STRING)
     private List<Authority> authorities;
+
+    public UserRoles(String name, List<Authority> authorities){
+        this.name = name;
+        this.authorities = authorities;
+    }
+    public UserRoles(){
+
+    }
+    public UserRoles(Long id, String name, List<Authority> authorities) {
+        this.id = id;
+        this.name = name;
+        this.authorities = authorities;
+    }
+    
 }

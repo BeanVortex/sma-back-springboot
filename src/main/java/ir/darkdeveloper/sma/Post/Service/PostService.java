@@ -83,6 +83,7 @@ public class PostService {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Transactional
     public Page<PostModel> allPosts(Pageable pageable) {
         return postRepo.findAll(pageable);
     }

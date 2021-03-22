@@ -61,8 +61,6 @@ public class JwtFilter extends OncePerRequestFilter {
                         UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities());
                         SecurityContextHolder.getContext().setAuthentication(upToken);
-                        System.out.println("AUTH");
-                        System.out.println(SecurityContextHolder.getContext().getAuthentication());
                         String newAccessToken = jwtUtils.generateAccessToken(username);
                         RefreshModel refreshModel = new RefreshModel();
                         refreshModel.setAccessToken(newAccessToken);

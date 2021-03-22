@@ -23,7 +23,7 @@ public class IOUtils {
         if (file != null) {
             // first it may not upload and save file in the path. should create static/img
             // folder in resources
-            String location = ResourceUtils.getFile("./build/resources/static/img/" + path).getAbsolutePath();
+            String location = ResourceUtils.getFile("build/resources/static/img/" + path).getAbsolutePath();
             byte[] bytes = file.getBytes();
             String fileName = UUID.randomUUID() + "." + file.getContentType().split("/")[1];
             Files.write(Paths.get(location + File.separator + fileName), bytes);

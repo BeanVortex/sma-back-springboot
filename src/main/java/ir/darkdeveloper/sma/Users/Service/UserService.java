@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -31,15 +32,15 @@ public class UserService implements UserDetailsService {
     private final RefreshService refreshService;
     private final UserUtils userUtils;
     private final JwtUtils jwtUtils;
-    private final Authentication auth;
+
+    
     @Autowired
     public UserService( UserRepo repo, UserRolesService roleService,
-            RefreshService refreshService, UserUtils userUtils, JwtUtils jwtUtils, Authentication auth) {
+            RefreshService refreshService, UserUtils userUtils, JwtUtils jwtUtils) {
         this.refreshService = refreshService;
         this.repo = repo;
         this.userUtils = userUtils;
         this.jwtUtils = jwtUtils;
-        this.auth = auth;
     }
 
     @Override
@@ -49,6 +50,7 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public UserModel updateUser(UserModel model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (!auth.getName().equals("anonymousUser")
                 || auth.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
                 || auth.getName().equals(model.getEmail())) {
@@ -105,7 +107,7 @@ public class UserService implements UserDetailsService {
     }
 
     public ResponseEntity<?> signUpUser(UserModel model, HttpServletResponse response) {
-        
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getName().equals("anonymousUser")
                 || auth.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
                 || !auth.getName().equals(model.getEmail())) {

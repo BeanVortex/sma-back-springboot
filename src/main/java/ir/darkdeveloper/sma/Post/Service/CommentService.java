@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import ir.darkdeveloper.sma.Post.Models.CommentModel;
@@ -19,14 +20,12 @@ public class CommentService {
     private final CommentRepo commentRepo;
     private final PostRepo postRepo;
     private final UserRepo userRepo;
-    private Authentication auth;
 
     @Autowired
-    public CommentService(CommentRepo commentRepo, PostRepo postRepo, UserRepo userRepo, Authentication auth) {
+    public CommentService(CommentRepo commentRepo, PostRepo postRepo, UserRepo userRepo) {
         this.commentRepo = commentRepo;
         this.postRepo = postRepo;
         this.userRepo = userRepo;
-        this.auth = auth;
     }
 
     @PreAuthorize("authentication.name != 'anonymousUser'")
@@ -41,8 +40,10 @@ public class CommentService {
     }
 
     public ResponseEntity<?> deleteComment(CommentModel comment) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
         UserModel userModel = userRepo
-                .findUserById(postRepo.findById(comment.getPost().getId().intValue()).getUser().getId());
+                .findUserById(postRepo.findPostById(comment.getPost().getId()).getUser().getId());
 
         if (auth.getName().equals(userModel.getEmail())
                 || auth.getAuthorities().contains(Authority.OP_DELETE_COMMENT)) {

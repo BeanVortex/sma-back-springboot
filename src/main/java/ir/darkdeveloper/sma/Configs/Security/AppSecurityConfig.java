@@ -41,7 +41,7 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf()
                 .disable()
                 .authorizeRequests()
-                .antMatchers("/", "/api/user/signup/", "/api/user/login/")
+                .antMatchers("/", "/api/user/signup/", "/api/user/login/", "/img/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
@@ -64,6 +64,8 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
+
+
 
     @Bean
     public PasswordEncoder passEncode() {

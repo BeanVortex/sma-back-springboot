@@ -19,5 +19,5 @@ public interface PostRepo extends PagingAndSortingRepository<PostModel, Long> {
     void deleteById (Long id);
 
     @Query("SELECT model FROM PostModel model WHERE model.id = :id")
-    public PostModel findById(@Param("id") Integer id);
+    public PostModel findPostById(@Param("id") Long id);
 }

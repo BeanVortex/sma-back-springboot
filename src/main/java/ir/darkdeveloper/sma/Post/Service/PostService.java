@@ -29,7 +29,7 @@ public class PostService {
     private final UserRepo userRepo;
     private final IOUtils ioUtils;
     private final String path = "posts/";
-    private Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
 
     @Autowired
     public PostService(PostRepo postRepo, UserRepo userRepo, IOUtils ioUtils) {
@@ -41,6 +41,7 @@ public class PostService {
     @Transactional
     @PreAuthorize("authentication.name != 'anonymousUser'")
     public ResponseEntity<?> savePost(PostModel model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth.getName().equals(userRepo.findUserById(model.getUser().getId()).getEmail())
                 || auth.getName().equals(userRepo.findUserById(model.getUser().getId()).getUserName())) {
 
@@ -48,7 +49,7 @@ public class PostService {
                 // For updating Post img by deleting previous img and replacing with new one and
                 // new name
 
-                PostModel preModel = postRepo.findById(model.getId().intValue());
+                PostModel preModel = postRepo.findPostById(model.getId());
                 if (model.getId() != null && model.getFile() != null) {
                     Files.delete(Paths.get(ioUtils.getImagePath(preModel, path)));
                 }
@@ -77,7 +78,7 @@ public class PostService {
     public ResponseEntity<?> newLike(PostModel model) {
 
         Long id = model.getId();
-        PostModel model2 = postRepo.findById(id.intValue());
+        PostModel model2 = postRepo.findPostById(id);
         Long likes = model2.getLikes();
         model2.setLikes(++likes);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -94,10 +95,11 @@ public class PostService {
 
     @Transactional
     public ResponseEntity<?> deletePost(PostModel post) {
-        UserModel userModel = userRepo.findUserById(postRepo.findById(post.getId().intValue()).getUser().getId());
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserModel userModel = userRepo.findUserById(postRepo.findPostById(post.getId()).getUser().getId());
         if (auth.getName().equals(userModel.getEmail()) || auth.getAuthorities().contains(Authority.OP_DELETE_POST)) {
             try {
-                PostModel model = postRepo.findById(post.getId().intValue());
+                PostModel model = postRepo.findPostById(post.getId());
 
                 Files.delete(Paths.get(ioUtils.getImagePath(model, path)));
                 postRepo.deleteById(post.getId());
@@ -113,7 +115,7 @@ public class PostService {
     }
 
     public PostModel getOnePost(Long id) {
-        return postRepo.findById(id.intValue());
+        return postRepo.findPostById(id);
     }
 
 }

@@ -20,7 +20,6 @@ public class CommentService {
     private final CommentRepo commentRepo;
     private final PostRepo postRepo;
     private final UserRepo userRepo;
-    private Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
     @Autowired
     public CommentService(CommentRepo commentRepo, PostRepo postRepo, UserRepo userRepo) {
@@ -41,8 +40,10 @@ public class CommentService {
     }
 
     public ResponseEntity<?> deleteComment(CommentModel comment) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
         UserModel userModel = userRepo
-                .findUserById(postRepo.findById(comment.getPost().getId().intValue()).getUser().getId());
+                .findUserById(postRepo.findPostById(comment.getPost().getId()).getUser().getId());
 
         if (auth.getName().equals(userModel.getEmail())
                 || auth.getAuthorities().contains(Authority.OP_DELETE_COMMENT)) {

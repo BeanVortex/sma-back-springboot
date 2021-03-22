@@ -33,6 +33,7 @@ public class UserService implements UserDetailsService {
     private final UserUtils userUtils;
     private final JwtUtils jwtUtils;
 
+    
     @Autowired
     public UserService( UserRepo repo, UserRolesService roleService,
             RefreshService refreshService, UserUtils userUtils, JwtUtils jwtUtils) {
@@ -49,10 +50,10 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public UserModel updateUser(UserModel model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (!authentication.getName().equals("anonymousUser")
-                || authentication.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
-                || authentication.getName().equals(model.getEmail())) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (!auth.getName().equals("anonymousUser")
+                || auth.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
+                || auth.getName().equals(model.getEmail())) {
             try {
                 userUtils.validateUserData(model);
                 return repo.save(model);
@@ -106,10 +107,10 @@ public class UserService implements UserDetailsService {
     }
 
     public ResponseEntity<?> signUpUser(UserModel model, HttpServletResponse response) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication.getName().equals("anonymousUser")
-                || authentication.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
-                || !authentication.getName().equals(model.getEmail())) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getName().equals("anonymousUser")
+                || auth.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
+                || !auth.getName().equals(model.getEmail())) {
             try {
                 
                 if (model.getUserName() != null && model.getUserName().equals(userUtils.getAdminUsername())){

@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -32,14 +31,15 @@ public class UserService implements UserDetailsService {
     private final RefreshService refreshService;
     private final UserUtils userUtils;
     private final JwtUtils jwtUtils;
-
+    private final Authentication auth;
     @Autowired
     public UserService( UserRepo repo, UserRolesService roleService,
-            RefreshService refreshService, UserUtils userUtils, JwtUtils jwtUtils) {
+            RefreshService refreshService, UserUtils userUtils, JwtUtils jwtUtils, Authentication auth) {
         this.refreshService = refreshService;
         this.repo = repo;
         this.userUtils = userUtils;
         this.jwtUtils = jwtUtils;
+        this.auth = auth;
     }
 
     @Override
@@ -49,10 +49,9 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public UserModel updateUser(UserModel model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (!authentication.getName().equals("anonymousUser")
-                || authentication.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
-                || authentication.getName().equals(model.getEmail())) {
+        if (!auth.getName().equals("anonymousUser")
+                || auth.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
+                || auth.getName().equals(model.getEmail())) {
             try {
                 userUtils.validateUserData(model);
                 return repo.save(model);
@@ -106,10 +105,10 @@ public class UserService implements UserDetailsService {
     }
 
     public ResponseEntity<?> signUpUser(UserModel model, HttpServletResponse response) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication.getName().equals("anonymousUser")
-                || authentication.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
-                || !authentication.getName().equals(model.getEmail())) {
+        
+        if (auth.getName().equals("anonymousUser")
+                || auth.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
+                || !auth.getName().equals(model.getEmail())) {
             try {
                 
                 if (model.getUserName() != null && model.getUserName().equals(userUtils.getAdminUsername())){

@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import ir.darkdeveloper.sma.Post.Models.PostModel;
@@ -29,13 +28,14 @@ public class PostService {
     private final UserRepo userRepo;
     private final IOUtils ioUtils;
     private final String path = "posts/";
-    private Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    private final Authentication auth;
 
     @Autowired
-    public PostService(PostRepo postRepo, UserRepo userRepo, IOUtils ioUtils) {
+    public PostService(PostRepo postRepo, UserRepo userRepo, IOUtils ioUtils, Authentication auth) {
         this.postRepo = postRepo;
         this.userRepo = userRepo;
         this.ioUtils = ioUtils;
+        this.auth = auth;
     }
 
     @Transactional

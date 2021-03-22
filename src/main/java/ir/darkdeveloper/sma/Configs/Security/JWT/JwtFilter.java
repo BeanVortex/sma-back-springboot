@@ -40,10 +40,10 @@ public class JwtFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         //String token = request.getHeader("Authorization");
 
-        String refreshToken = request.getHeader("RefreshToken");
-        String accessToken = request.getHeader("AccessToken");
-        String user_id = request.getHeader("UserId");
-        response.setHeader("Access-Control-Expose-Headers", "AccessToken, RefreshToken");
+
+        String refreshToken = request.getHeader("refresh_token");
+        String accessToken = request.getHeader("access_token");
+        String user_id = request.getHeader("user_id");
 
         if (user_id != null) {
             Long userId = Long.parseLong(user_id);
@@ -74,8 +74,8 @@ public class JwtFilter extends OncePerRequestFilter {
                                     refreshService.getIdByUserId(userUtils.getUserIdByUsernameOrEmail(username)));
                         }
                         refreshService.saveToken(refreshModel);
-                        response.addHeader("AccessToken", newAccessToken);
-                        response.addHeader("RefreshToken", refreshToken);
+                        response.addHeader("access_token", newAccessToken);
+                        response.addHeader("refresh_token", refreshToken);
                     }
                 }
             }

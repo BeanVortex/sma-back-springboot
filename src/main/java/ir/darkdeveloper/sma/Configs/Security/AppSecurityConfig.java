@@ -1,5 +1,7 @@
 package ir.darkdeveloper.sma.Configs.Security;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +15,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import ir.darkdeveloper.sma.Configs.Security.JWT.JwtFilter;
 import ir.darkdeveloper.sma.Users.Service.UserService;
@@ -32,6 +37,7 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        http.cors();
         http.csrf()
                 .disable()
                 .authorizeRequests()
@@ -42,9 +48,8 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
                 // .and()
                 // .formLogin()
                 .and()
-                .cors()
-                .and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
     }
@@ -63,5 +68,17 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public PasswordEncoder passEncode() {
         return new BCryptPasswordEncoder(12);
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.addExposedHeader("refresh_token, access_token, expiration");
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

@@ -2,6 +2,8 @@ package ir.darkdeveloper.sma.Users.Service;
 
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ public class UserRolesService {
         this.repo = repo;
     }
 
+    @Transactional
     public ResponseEntity<?> saveRole(UserRoles role) {
         try {
             repo.save(role);
@@ -46,5 +49,9 @@ public class UserRolesService {
         }
         return new ResponseEntity<>(HttpStatus.OK);
 	}
+
+    public Boolean exists(){
+        return repo.existsById(1L);
+    }
 
 }

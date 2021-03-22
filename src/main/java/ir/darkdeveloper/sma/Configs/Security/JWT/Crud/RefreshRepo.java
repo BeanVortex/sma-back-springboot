@@ -20,4 +20,5 @@ public interface RefreshRepo extends JpaRepository<RefreshModel, Long> {
     @Query("SELECT model.id FROM RefreshModel model WHERE model.userId=:id")
 	Long getIdByUserId(@Param("id") Long adminId);
 
+
 }

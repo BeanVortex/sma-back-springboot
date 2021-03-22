@@ -144,6 +144,7 @@ Example:
 
 ## Posts
 
+
 > Posts All: By ``GET`` requesting to this api you will get all the posts listed in pagination format
 
 ```

@@ -43,6 +43,7 @@ public class CommentService {
     public ResponseEntity<?> deleteComment(CommentModel comment) {
         UserModel userModel = userRepo
                 .findUserById(postRepo.findById(comment.getPost().getId().intValue()).getUser().getId());
+
         if (auth.getName().equals(userModel.getEmail())
                 || auth.getAuthorities().contains(Authority.OP_DELETE_COMMENT)) {
             try {

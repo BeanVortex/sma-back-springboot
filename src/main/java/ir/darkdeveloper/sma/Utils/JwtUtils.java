@@ -4,9 +4,7 @@ import java.util.Date;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;
@@ -19,16 +17,17 @@ public class JwtUtils {
     @Value("${jwt.secretkey}")
     private String secret;
 
-    private final PasswordEncoder encoder;
+    // private final PasswordEncoder encoder;
 
-    @Autowired
-    public JwtUtils(PasswordEncoder encoder) {
-        this.encoder = encoder;
-    }
+    // @Autowired
+    // public JwtUtils(PasswordEncoder encoder) {
+    //     this.encoder = encoder;
+    // }
 
     @PostConstruct
     public void initSecret(){
-        secret = encoder.encode(secret);
+        //  TODO
+       // secret = encoder.encode(secret);
     }
 
     //refresh token is used to generate access token

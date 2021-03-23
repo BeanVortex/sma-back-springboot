@@ -1,2 +1,2 @@
 
-web: ls & java -Dserver.port=$PORT $JAVA_OPTS -Djasypt.encryptor.password=ChangeMe -jar build/libs/*.war wait -n
+web: mkdir ./build/resources/static & mkdir ./build/resources/static/img & mkdir ./build/resources/static/img/posts & mkdir ./build/resources/static/img/profiles & java -Dserver.port=$PORT $JAVA_OPTS -Djasypt.encryptor.password=ChangeMe -jar build/libs/*.war wait -n

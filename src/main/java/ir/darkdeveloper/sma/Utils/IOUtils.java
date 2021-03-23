@@ -34,7 +34,7 @@ public class IOUtils {
 
 
     public String getImagePath(ImageUtil model, String path) throws Exception{
-        return ResourceUtils.getFile("classpath:static/img/" + path).getAbsolutePath() + File.separator
+        return ResourceUtils.getFile("build/resources/static/img/" + path).getAbsolutePath() + File.separator
                         + model.getImage();
     }
 

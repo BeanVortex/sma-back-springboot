@@ -7,18 +7,20 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import ir.darkdeveloper.sma.Users.Models.UserModel;
 import lombok.Data;
 
 @Data
 @Entity
 @Table(name = "comments")
-public class CommentModel  {
+public class CommentModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,7 +32,12 @@ public class CommentModel  {
     private Long likes;
 
     @ManyToOne
+    @JoinColumn(name="post_id")
     private PostModel post;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private UserModel user;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp

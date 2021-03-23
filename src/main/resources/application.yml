@@ -11,7 +11,7 @@ spring:
   profiles: dev
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
       naming:
         implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyHbmImpl
         physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
@@ -22,8 +22,8 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/sma
-    username: ENC(8AeVekzcG3bqedcrXfmGUssZ+JgDZ3KZ)
-    password: ENC(OX8AtHJIuZrRUmZPbcpVmg==)
+    username: darkdeveloper
+    password: 1234
   security:
     user:
       name: ENC(1hak+QtSRqr4mBHZJYSx2mUT8bchOLpf)

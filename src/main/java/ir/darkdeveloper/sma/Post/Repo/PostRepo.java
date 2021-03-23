@@ -14,7 +14,6 @@ public interface PostRepo extends PagingAndSortingRepository<PostModel, Long> {
 
     Page<PostModel> findByContentAndTitleContains( String content, String title, Pageable pageable);
 
-    Page<PostModel> findAll(Pageable pageable);
 
     void deleteById (Long id);
 

@@ -3,6 +3,7 @@ package ir.darkdeveloper.sma.Post.Service;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import ir.darkdeveloper.sma.Users.Models.Authority;
 import ir.darkdeveloper.sma.Users.Models.UserModel;
 import ir.darkdeveloper.sma.Users.Repo.UserRepo;
 import ir.darkdeveloper.sma.Utils.IOUtils;
+import ir.darkdeveloper.sma.Utils.UserUtils;
 
 @Service
 public class PostService {
@@ -28,20 +30,22 @@ public class PostService {
     private final PostRepo postRepo;
     private final UserRepo userRepo;
     private final IOUtils ioUtils;
+    private final UserUtils userUtils;
     private final String path = "posts/";
 
-
     @Autowired
-    public PostService(PostRepo postRepo, UserRepo userRepo, IOUtils ioUtils) {
+    public PostService(PostRepo postRepo, UserRepo userRepo, IOUtils ioUtils, UserUtils userUtils) {
         this.postRepo = postRepo;
         this.userRepo = userRepo;
         this.ioUtils = ioUtils;
+        this.userUtils = userUtils;
     }
 
     @Transactional
     @PreAuthorize("authentication.name != 'anonymousUser'")
-    public ResponseEntity<?> savePost(PostModel model) {
+    public ResponseEntity<?> savePost(HttpServletRequest request, PostModel model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        userUtils.setUserIdForPost(request, model);
         if (auth.getName().equals(userRepo.findUserById(model.getUser().getId()).getEmail())
                 || auth.getName().equals(userRepo.findUserById(model.getUser().getId()).getUserName())) {
 
@@ -94,9 +98,10 @@ public class PostService {
     }
 
     @Transactional
-    public ResponseEntity<?> deletePost(PostModel post) {
+    public ResponseEntity<?> deletePost(HttpServletRequest request, PostModel post) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        UserModel userModel = userRepo.findUserById(postRepo.findPostById(post.getId()).getUser().getId());
+        userUtils.setUserIdForPost(request, post);
+        UserModel userModel = userRepo.findUserById(post.getUser().getId());
         if (auth.getName().equals(userModel.getEmail()) || auth.getAuthorities().contains(Authority.OP_DELETE_POST)) {
             try {
                 PostModel model = postRepo.findPostById(post.getId());

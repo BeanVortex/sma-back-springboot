@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 import ir.darkdeveloper.sma.Configs.Security.JWT.JwtAuth;
 import ir.darkdeveloper.sma.Configs.Security.JWT.Crud.RefreshModel;
 import ir.darkdeveloper.sma.Configs.Security.JWT.Crud.RefreshService;
+import ir.darkdeveloper.sma.Post.Models.PostModel;
 import ir.darkdeveloper.sma.Users.Models.Authority;
 import ir.darkdeveloper.sma.Users.Models.UserModel;
 import ir.darkdeveloper.sma.Users.Repo.UserRepo;
@@ -142,5 +144,17 @@ public class UserUtils {
         Files.delete(Paths.get(ioUtils.getImagePath(model, path)));
         repo.deleteById(model.getId());
         refreshService.deleteTokenByUserId(model.getId());
+    }
+
+    public void setUserIdForPost(HttpServletRequest request, PostModel post) {
+        String token = request.getHeader("refresh_token");
+        if (token != null) {
+            Long userId = getUserIdByUsernameOrEmail(jwtUtils.getUsername(token));
+            if(userId != null) {
+                post.setUser(new UserModel());
+                post.getUser().setId(userId);
+            }
+        }
+            
     }
 }

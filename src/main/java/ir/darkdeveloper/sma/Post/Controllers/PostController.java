@@ -1,5 +1,7 @@
 package ir.darkdeveloper.sma.Post.Controllers;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,8 +31,8 @@ public class PostController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<?> savePost(@ModelAttribute PostModel model) {
-        return service.savePost(model);
+    public ResponseEntity<?> savePost(HttpServletRequest request, @ModelAttribute PostModel model) {
+        return service.savePost(request, model);
     }
 
     @GetMapping("/")
@@ -50,8 +52,8 @@ public class PostController {
     }
 
     @DeleteMapping("/")
-    public ResponseEntity<?> deletePost(@RequestBody PostModel model) {
-        return service.deletePost(model);
+    public ResponseEntity<?> deletePost(HttpServletRequest request, @RequestBody PostModel model) {
+        return service.deletePost(request, model);
     }
 
 }

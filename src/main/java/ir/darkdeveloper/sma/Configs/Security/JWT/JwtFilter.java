@@ -40,44 +40,40 @@ public class JwtFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         //String token = request.getHeader("Authorization");
 
-
         String refreshToken = request.getHeader("refresh_token");
         String accessToken = request.getHeader("access_token");
-        String user_id = request.getHeader("user_id");
 
-        if (user_id != null) {
-            Long userId = Long.parseLong(user_id);
-
+        if (refreshToken != null && accessToken != null) {
+            Long userId = userUtils.getUserIdByUsernameOrEmail(jwtUtils.getUsername(refreshToken));
             String storedAccessToken = refreshService.getRefreshByUserId(userId).getAccessToken();
             String storedRefreshToken = refreshService.getRefreshByUserId(userId).getRefreshToken();
+            if (storedAccessToken != null && storedRefreshToken != null && accessToken.equals(storedAccessToken)
+                    && refreshToken.equals(storedRefreshToken) && !jwtUtils.isTokenExpired(storedRefreshToken)) {
 
-            if (refreshToken != null && accessToken != null) {
-                if (accessToken.equals(storedAccessToken) && refreshToken.equals(storedRefreshToken) && !jwtUtils.isTokenExpired(storedRefreshToken)) {
+                String username = jwtUtils.getUsername(refreshToken);
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-                    String username = jwtUtils.getUsername(refreshToken);
-                    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-                    if (username != null && auth == null) {
-                        UserDetails userDetails = userUtils.loadUserByUsername(username);
-                        UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities());
-                        SecurityContextHolder.getContext().setAuthentication(upToken);
-                        String newAccessToken = jwtUtils.generateAccessToken(username);
-                        RefreshModel refreshModel = new RefreshModel();
-                        refreshModel.setAccessToken(newAccessToken);
-                        refreshModel.setRefreshToken(storedRefreshToken);
-                        refreshModel.setUserId(userId);
-                        if (username.equals(userUtils.getAdminUsername())) {
-                            refreshModel.setId(refreshService.getIdByUserId(userUtils.getAdminId()));
-                        } else {
-                            refreshModel.setId(
-                                    refreshService.getIdByUserId(userUtils.getUserIdByUsernameOrEmail(username)));
-                        }
-                        refreshService.saveToken(refreshModel);
-                        response.addHeader("access_token", newAccessToken);
-                        response.addHeader("refresh_token", refreshToken);
+                if (username != null && auth == null) {
+                    UserDetails userDetails = userUtils.loadUserByUsername(username);
+                    UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(userDetails,
+                            null, userDetails.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(upToken);
+                    String newAccessToken = jwtUtils.generateAccessToken(username);
+                    RefreshModel refreshModel = new RefreshModel();
+                    refreshModel.setAccessToken(newAccessToken);
+                    refreshModel.setRefreshToken(storedRefreshToken);
+                    refreshModel.setUserId(userId);
+                    if (username.equals(userUtils.getAdminUsername())) {
+                        refreshModel.setId(refreshService.getIdByUserId(userUtils.getAdminId()));
+                    } else {
+                        refreshModel
+                                .setId(refreshService.getIdByUserId(userUtils.getUserIdByUsernameOrEmail(username)));
                     }
+                    refreshService.saveToken(refreshModel);
+                    response.addHeader("access_token", newAccessToken);
+                    response.addHeader("refresh_token", refreshToken);
                 }
+
             }
         }
 

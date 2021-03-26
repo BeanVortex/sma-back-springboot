@@ -46,14 +46,19 @@ public class PostController {
     }
 
     @GetMapping("/search/")
-    public Page<PostModel> searchPost(@RequestParam String content,
-            @RequestParam(required = false) String title, Pageable pageable) {
+    public Page<PostModel> searchPost(@RequestParam String content, @RequestParam(required = false) String title,
+            Pageable pageable) {
         return service.searchPost(content, title, pageable);
     }
 
     @DeleteMapping("/")
     public ResponseEntity<?> deletePost(HttpServletRequest request, @RequestBody PostModel model) {
         return service.deletePost(request, model);
+    }
+
+    @GetMapping("/user/{id}/")
+    public Page<PostModel> getOneUserPosts(@PathVariable("id") Long id, Pageable pageable) {
+        return service.getOneUserPosts(id, pageable);
     }
 
 }

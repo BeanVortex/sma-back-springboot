@@ -123,4 +123,8 @@ public class PostService {
         return postRepo.findPostById(id);
     }
 
+    public Page<PostModel> getOneUserPosts(Long userId, Pageable pageable) {
+        return postRepo.getOneUserPosts(userId, pageable);
+    }
+
 }

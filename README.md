@@ -1,4 +1,6 @@
 # sma-back-springboot
+## Simple Social Media Application
+### You can create posts with pictures and you can also comment on them. Before these actions you should login or sign up
 
 # How to use
 

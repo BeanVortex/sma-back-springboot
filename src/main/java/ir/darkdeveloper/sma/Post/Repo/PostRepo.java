@@ -21,6 +21,6 @@ public interface PostRepo extends PagingAndSortingRepository<PostModel, Long> {
     public PostModel findPostById(@Param("id") Long id);
 
 
-    @Query("SELECT model FROM PostModel model WHERE model.user = :id")
+    @Query("SELECT model FROM PostModel model WHERE model.user.id = :id")
     Page<PostModel> getOneUserPosts(@Param("id") Long userId, Pageable pageable);
 }

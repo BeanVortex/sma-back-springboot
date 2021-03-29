@@ -11,6 +11,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -20,6 +23,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "comments")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class CommentModel {
 
     @Id
@@ -32,11 +36,11 @@ public class CommentModel {
     private Long likes;
 
     @ManyToOne
-    @JoinColumn(name="post_id")
+    @JoinColumn(name = "post_id", referencedColumnName = "id", nullable = false)
     private PostModel post;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private UserModel user;
 
     @Column(name = "created_at", updatable = false)

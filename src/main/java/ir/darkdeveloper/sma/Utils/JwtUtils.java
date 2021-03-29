@@ -26,7 +26,6 @@ public class JwtUtils {
 
     @PostConstruct
     public void initSecret(){
-        //  TODO
        // secret = encoder.encode(secret);
     }
 

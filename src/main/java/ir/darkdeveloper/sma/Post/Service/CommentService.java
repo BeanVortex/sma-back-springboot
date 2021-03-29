@@ -1,6 +1,8 @@
 package ir.darkdeveloper.sma.Post.Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -59,7 +61,6 @@ public class CommentService {
 
     }
 
-    //TODO
     @PreAuthorize("authentication.name != 'anonymousUser'")
     public ResponseEntity<?> newLike(CommentModel model) {
         Long id = model.getId();
@@ -67,6 +68,10 @@ public class CommentService {
         Long likes = model2.getLikes();
         model2.setLikes(++likes);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    public Page<CommentModel> getPostComments(Long postId, Pageable pageable) {
+        return commentRepo.findCommentByPostId(postId, pageable);
     }
 
 }

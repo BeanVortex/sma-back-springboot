@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -82,7 +83,9 @@ public class UserUtils {
         refreshService.saveToken(rModel);
         response.addHeader("access_token", accessToken);
         response.addHeader("refresh_token", refreshToken);
-        response.addHeader("expiration", jwtUtils.getExpirationDate(refreshToken).toString());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("EE MMM dd yyyy HH:mm:ss");
+        var date = dateFormat.format(jwtUtils.getExpirationDate(refreshToken));
+        response.addHeader("expiration", date);
     }
 
     public void validateUserData(UserModel model) throws FileNotFoundException, IOException, Exception {
@@ -150,11 +153,11 @@ public class UserUtils {
         String token = request.getHeader("refresh_token");
         if (token != null) {
             Long userId = getUserIdByUsernameOrEmail(jwtUtils.getUsername(token));
-            if(userId != null) {
+            if (userId != null) {
                 post.setUser(new UserModel());
                 post.getUser().setId(userId);
             }
         }
-            
+
     }
 }

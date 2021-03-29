@@ -77,7 +77,6 @@ public class PostService {
         return new ResponseEntity<>("You can't do this action", HttpStatus.FORBIDDEN);
     }
 
-    // TODO
     @PreAuthorize("authentication.name != 'anonymousUser'")
     public ResponseEntity<?> newLike(PostModel model) {
 

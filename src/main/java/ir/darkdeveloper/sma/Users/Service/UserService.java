@@ -17,30 +17,21 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import ir.darkdeveloper.sma.Configs.Security.JWT.JwtAuth;
-import ir.darkdeveloper.sma.Configs.Security.JWT.Crud.RefreshModel;
-import ir.darkdeveloper.sma.Configs.Security.JWT.Crud.RefreshService;
 import ir.darkdeveloper.sma.Users.Models.Authority;
 import ir.darkdeveloper.sma.Users.Models.UserModel;
 import ir.darkdeveloper.sma.Users.Repo.UserRepo;
-import ir.darkdeveloper.sma.Utils.JwtUtils;
 import ir.darkdeveloper.sma.Utils.UserUtils;
 
 @Service("userService")
 public class UserService implements UserDetailsService {
 
     private final UserRepo repo;
-    private final RefreshService refreshService;
     private final UserUtils userUtils;
-    private final JwtUtils jwtUtils;
 
-    
     @Autowired
-    public UserService( UserRepo repo, UserRolesService roleService,
-            RefreshService refreshService, UserUtils userUtils, JwtUtils jwtUtils) {
-        this.refreshService = refreshService;
+    public UserService(UserRepo repo, UserRolesService roleService, UserUtils userUtils) {
         this.repo = repo;
         this.userUtils = userUtils;
-        this.jwtUtils = jwtUtils;
     }
 
     @Override
@@ -51,8 +42,7 @@ public class UserService implements UserDetailsService {
     @Transactional
     public UserModel updateUser(UserModel model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!auth.getName().equals("anonymousUser")
-                || auth.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
+        if (!auth.getName().equals("anonymousUser") || auth.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
                 || auth.getName().equals(model.getEmail())) {
             try {
                 userUtils.validateUserData(model);
@@ -83,37 +73,27 @@ public class UserService implements UserDetailsService {
     }
 
     public ResponseEntity<?> loginUser(JwtAuth model, HttpServletResponse response) {
-        RefreshModel refreshModel;
-        if (model.getUsername().equals(userUtils.getAdminUsername())) {
-            refreshModel = refreshService.getRefreshByUserId(userUtils.getAdminId());
-        } else {
-            refreshModel = refreshService.getRefreshByUserId(userUtils.getUserIdByUsernameOrEmail(model.getUsername()));
-        }
 
-        if (refreshModel == null || !jwtUtils.isTokenExpired(refreshModel.getRefreshToken())) {
-            try {
-                if (model.getUsername().equals(userUtils.getAdminUsername())) {
-                    userUtils.authenticateUser(model, null, null, response);
-                } else {
-                    userUtils.authenticateUser(model, userUtils.getUserIdByUsernameOrEmail(model.getUsername()), null,
-                            response);
-                }
-                return new ResponseEntity<>(repo.findByEmailOrUsername(model.getUsername()), HttpStatus.OK);
-            } catch (Exception e) {
-                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        try {
+            if (model.getUsername().equals(userUtils.getAdminUsername())) {
+                userUtils.authenticateUser(model, null, null, response);
+            } else {
+                userUtils.authenticateUser(model, userUtils.getUserIdByUsernameOrEmail(model.getUsername()), null,
+                        response);
             }
+            return new ResponseEntity<>(repo.findByEmailOrUsername(model.getUsername()), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>("Already logged in!", HttpStatus.BAD_REQUEST);
     }
 
     public ResponseEntity<?> signUpUser(UserModel model, HttpServletResponse response) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getName().equals("anonymousUser")
-                || auth.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
+        if (auth.getName().equals("anonymousUser") || auth.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
                 || !auth.getName().equals(model.getEmail())) {
             try {
-                
-                if (model.getUserName() != null && model.getUserName().equals(userUtils.getAdminUsername())){
+
+                if (model.getUserName() != null && model.getUserName().equals(userUtils.getAdminUsername())) {
                     return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
                 }
                 String rawPass = model.getPassword();

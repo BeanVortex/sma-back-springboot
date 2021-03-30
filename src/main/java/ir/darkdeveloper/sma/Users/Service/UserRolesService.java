@@ -50,8 +50,11 @@ public class UserRolesService {
         return new ResponseEntity<>(HttpStatus.OK);
 	}
 
-    public Boolean exists(){
-        return repo.existsById(1L);
+    public Boolean exists(String name){
+        if(repo.getUSER(name) != null){
+            return true;
+        }
+        return false;
     }
 
 }

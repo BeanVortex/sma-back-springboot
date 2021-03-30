@@ -37,10 +37,7 @@ public class UserRoles implements Serializable {
     @Enumerated(EnumType.STRING)
     private List<Authority> authorities;
 
-    public UserRoles(String name, List<Authority> authorities){
-        this.name = name;
-        this.authorities = authorities;
-    }
+
     public UserRoles(){
 
     }

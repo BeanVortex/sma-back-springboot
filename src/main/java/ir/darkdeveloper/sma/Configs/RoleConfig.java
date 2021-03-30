@@ -23,10 +23,10 @@ public class RoleConfig {
     }
 
     private void createDefaultRole() {
-        if (!service.exists()){
+        if (!service.exists("USER")) {
             List<Authority> authorities = new ArrayList<>();
             authorities.addAll(List.of(Authority.OP_EDIT_USER, Authority.OP_ACCESS_USER, Authority.OP_DELETE_USER));
-            service.saveRole(new UserRoles("USER", authorities));
+            service.saveRole(new UserRoles(1L, "USER", authorities));
         }
     }
 

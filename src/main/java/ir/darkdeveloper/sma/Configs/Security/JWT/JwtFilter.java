@@ -44,13 +44,16 @@ public class JwtFilter extends OncePerRequestFilter {
         String accessToken = request.getHeader("access_token");
 
         if (refreshToken != null && accessToken != null) {
-            Long userId = userUtils.getUserIdByUsernameOrEmail(jwtUtils.getUsername(refreshToken));
+            String username = jwtUtils.getUsername(refreshToken);
+
+            Long userId = username.equals(userUtils.getAdminUsername()) ? userUtils.getAdminId()
+                    : userUtils.getUserIdByUsernameOrEmail(username);
+
             String storedAccessToken = refreshService.getRefreshByUserId(userId).getAccessToken();
             String storedRefreshToken = refreshService.getRefreshByUserId(userId).getRefreshToken();
             if (storedAccessToken != null && storedRefreshToken != null && accessToken.equals(storedAccessToken)
                     && refreshToken.equals(storedRefreshToken) && !jwtUtils.isTokenExpired(storedRefreshToken)) {
 
-                String username = jwtUtils.getUsername(refreshToken);
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
                 if (username != null && auth == null) {
@@ -65,6 +68,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     refreshModel.setUserId(userId);
                     if (username.equals(userUtils.getAdminUsername())) {
                         refreshModel.setId(refreshService.getIdByUserId(userUtils.getAdminId()));
+                        response.addHeader("userId", "" + refreshModel.getId());
                     } else {
                         refreshModel
                                 .setId(refreshService.getIdByUserId(userUtils.getUserIdByUsernameOrEmail(username)));

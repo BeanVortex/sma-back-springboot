@@ -75,7 +75,8 @@ public class UserUtils {
         rModel.setAccessToken(accessToken);
         if (model.getUsername().equals(getAdminUsername())) {
             rModel.setUserId(getAdminId());
-            rModel.setId(refreshService.getIdByUserId(getAdminId()));
+            rModel.setId(refreshService.getIdByUserId(getAdminId()));                
+            response.addHeader("user_id", "" + getAdminId());
         } else {
             rModel.setId(refreshService.getIdByUserId(userId));
             rModel.setUserId(getUserIdByUsernameOrEmail(username));

@@ -68,7 +68,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     refreshModel.setUserId(userId);
                     if (username.equals(userUtils.getAdminUsername())) {
                         refreshModel.setId(refreshService.getIdByUserId(userUtils.getAdminId()));
-                        response.addHeader("userId", "" + refreshModel.getId());
+                        response.addHeader("user_id", "" + refreshModel.getId());
                     } else {
                         refreshModel
                                 .setId(refreshService.getIdByUserId(userUtils.getUserIdByUsernameOrEmail(username)));

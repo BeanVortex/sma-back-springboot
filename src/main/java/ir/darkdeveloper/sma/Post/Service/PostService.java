@@ -123,6 +123,9 @@ public class PostService {
     }
 
     public Page<PostModel> getOneUserPosts(Long userId, Pageable pageable) {
+        System.out.println("\n");
+        System.out.println(postRepo.getOneUserPosts(userId, pageable)== null ? null : 1);
+        System.out.println("\n");
         return postRepo.getOneUserPosts(userId, pageable);
     }
 

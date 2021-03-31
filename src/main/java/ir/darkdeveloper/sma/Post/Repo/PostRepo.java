@@ -12,15 +12,13 @@ import ir.darkdeveloper.sma.Post.Models.PostModel;
 @Repository
 public interface PostRepo extends PagingAndSortingRepository<PostModel, Long> {
 
-    Page<PostModel> findByContentAndTitleContains( String content, String title, Pageable pageable);
+    Page<PostModel> findByContentAndTitleContains(String content, String title, Pageable pageable);
 
-
-    void deleteById (Long id);
+    void deleteById(Long id);
 
     @Query("SELECT model FROM PostModel model WHERE model.id = :id")
     public PostModel findPostById(@Param("id") Long id);
 
-
-    @Query("SELECT model FROM PostModel model WHERE model.user.id = :id")
+    @Query("SELECT model from PostModel model WHERE model.user.id = :id")
     Page<PostModel> getOneUserPosts(@Param("id") Long userId, Pageable pageable);
 }

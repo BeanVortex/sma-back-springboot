@@ -35,7 +35,7 @@ public class PostController {
         return service.savePost(request, model);
     }
 
-    @GetMapping("/")
+    @GetMapping("/all/")
     public Page<PostModel> allPosts(Pageable pageable) {
         return service.allPosts(pageable);
     }

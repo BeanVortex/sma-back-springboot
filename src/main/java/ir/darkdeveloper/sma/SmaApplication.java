@@ -9,18 +9,16 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class SmaApplication {
 
     public static void main(String[] args) {
-        disableWarning();
+        //disableWarning();
         SpringApplication.run(SmaApplication.class, args);
     }
 
 
 
-    public static void disableWarning() {
-        System.err.close();
-        System.setErr(System.out);
-    }
+    // public static void disableWarning() {
+    //     System.err.close();
+    //     System.setErr(System.out);
+    // }
 
 
 }
-
-

@@ -12,7 +12,7 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
       naming:
         implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyHbmImpl
         physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
@@ -22,10 +22,10 @@ spring:
         #format_sql: true
     #show-sql: true
   datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/sma
-    username: darkdeveloper
-    password: 1234
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2://mem:db;DB_CLOSE_DELAY=-1
+    username: sa
+    password: sa
   security:
     user:
       name: ENC(1hak+QtSRqr4mBHZJYSx2mUT8bchOLpf)

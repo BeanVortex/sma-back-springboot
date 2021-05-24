@@ -10,15 +10,17 @@ jasypt:
 spring:
   profiles: dev
   jpa:
+    show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
       naming:
         implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyHbmImpl
         physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: true
+        #format_sql: true
+    #show-sql: true
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/sma
@@ -28,7 +30,12 @@ spring:
     user:
       name: ENC(1hak+QtSRqr4mBHZJYSx2mUT8bchOLpf)
       password: ENC(G1d9E+0lFVNTXE6CYoATcA==)
-
+  banner:
+    location: classpath:banners/banner4
+    # width:
+    # height:
+    # margin:
+    # invert:
 
 server:
   port: 8080

@@ -14,7 +14,6 @@ public class SmaApplication {
     }
 
 
-
     // public static void disableWarning() {
     //     System.err.close();
     //     System.setErr(System.out);

@@ -1,7 +1,6 @@
 package ir.darkdeveloper.sma.Users.Repo;
 
 import ir.darkdeveloper.sma.Users.Models.UserRoles;
-import org.assertj.core.api.AssertionsForClassTypes;
 import static org.assertj.core.api.AssertionsForClassTypes.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

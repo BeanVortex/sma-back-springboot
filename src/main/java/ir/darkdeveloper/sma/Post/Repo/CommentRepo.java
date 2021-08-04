@@ -8,8 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import ir.darkdeveloper.sma.Post.Models.CommentModel;
 
-import java.util.Optional;
-
 @Repository
 public interface CommentRepo extends PagingAndSortingRepository<CommentModel, Long> {
     @Query("SELECT model FROM CommentModel model WHERE model.id = :id")

@@ -31,7 +31,7 @@ spring:
       name: ENC(1hak+QtSRqr4mBHZJYSx2mUT8bchOLpf)
       password: ENC(G1d9E+0lFVNTXE6CYoATcA==)
   banner:
-    location: classpath:banners/banner4
+    location: classpath:banners/banner3
     # width:
     # height:
     # margin:

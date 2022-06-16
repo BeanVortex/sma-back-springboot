@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import ir.darkdeveloper.sma.Post.Models.CommentModel;
-import ir.darkdeveloper.sma.Post.Repo.CommentRepo;
+import ir.darkdeveloper.sma.model.CommentModel;
+import ir.darkdeveloper.sma.repository.CommentRepo;
 
 @DataJpaTest
 public class CommentRepoTest {

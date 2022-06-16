@@ -1,13 +1,12 @@
 plugins {
-    id 'org.springframework.boot' version '2.4.5'
+    id 'org.springframework.boot' version '2.7.0'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
-    id 'war'
 }
 
 group = 'ir.darkdeveloper'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '16'
+sourceCompatibility = '18'
 
 configurations {
     compileOnly {
@@ -25,15 +24,13 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation "io.springfox:springfox-boot-starter:3.0.0"
     implementation 'io.jsonwebtoken:jjwt:0.9.1'
-	implementation "com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.3"
-    compileOnly 'org.projectlombok:lombok'
-    runtimeOnly 'org.postgresql:postgresql'
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.8.0-M1'
-    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
-    testImplementation 'org.assertj:assertj-core:3.6.1'
-    testImplementation "com.h2database:h2:1.4.200"
-    annotationProcessor 'org.projectlombok:lombok'
-    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+	implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.4'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    runtimeOnly 'org.postgresql:postgresql:42.3.6'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'com.h2database:h2:2.1.212'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 

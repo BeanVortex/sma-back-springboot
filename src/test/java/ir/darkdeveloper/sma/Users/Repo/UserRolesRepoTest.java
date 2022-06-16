@@ -1,7 +1,9 @@
 package ir.darkdeveloper.sma.Users.Repo;
 
-import ir.darkdeveloper.sma.Users.Models.UserRoles;
+import ir.darkdeveloper.sma.model.UserRoles;
 import static org.assertj.core.api.AssertionsForClassTypes.*;
+
+import ir.darkdeveloper.sma.repository.UserRolesRepo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;

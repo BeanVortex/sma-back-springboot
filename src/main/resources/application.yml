@@ -2,13 +2,12 @@ spring:
   profiles.active: dev
 ---
 jwt:
-  secretkey: RandomSecret
+  secretKey: RandomSecret
 jasypt:
   encryptor:
     algorithm: PBEWithMD5AndDES
     iv-generator-classname: org.jasypt.iv.NoIvGenerator
 spring:
-  profiles: dev
   jpa:
     show-sql: true
     hibernate:
@@ -36,6 +35,9 @@ spring:
     # height:
     # margin:
     # invert:
+  config:
+    activate:
+      on-profile: dev
 
 server:
   port: 8080

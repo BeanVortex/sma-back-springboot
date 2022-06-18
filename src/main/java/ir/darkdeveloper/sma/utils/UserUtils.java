@@ -10,6 +10,7 @@ import ir.darkdeveloper.sma.model.RefreshModel;
 import ir.darkdeveloper.sma.model.UserModel;
 import ir.darkdeveloper.sma.repository.UserRepo;
 import ir.darkdeveloper.sma.service.RefreshService;
+import ir.darkdeveloper.sma.service.UserRolesService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 import java.util.Optional;
 
 import static ir.darkdeveloper.sma.config.StartupConfig.DATE_FORMATTER;
@@ -36,6 +38,7 @@ public class UserUtils {
     private final UserRepo repo;
     private final PasswordEncoder encoder;
     private final IOUtils ioUtils;
+    private final UserRolesService rolesService;
     private final AdminUserProperties adminUser;
 
 
@@ -101,7 +104,7 @@ public class UserUtils {
     public void setUserIdForPost(HttpServletRequest request, PostModel post) {
         var token = request.getHeader("refresh_token");
         if (token != null) {
-            Long userId = getUserIdByUsernameOrEmail(jwtUtils.getUsername(token));
+            var userId = getUserIdByUsernameOrEmail(jwtUtils.getUsername(token));
             if (userId != null) {
                 post.setUser(new UserModel());
                 post.getUser().setId(userId);
@@ -136,6 +139,7 @@ public class UserUtils {
         var rawPass = model.map(UserModel::getPassword)
                 .orElseThrow(() -> new PasswordException("Password is required!"));
         validateUserData(model);
+        user.setRoles(List.of(rolesService.getRoles("USER")));
         ioUtils.saveUserImages(user);
         user.setPassword(encoder.encode(user.getPassword()));
         repo.save(user);

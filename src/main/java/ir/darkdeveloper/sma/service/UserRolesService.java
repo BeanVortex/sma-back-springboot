@@ -1,62 +1,44 @@
 package ir.darkdeveloper.sma.service;
 
-import java.util.List;
-import java.util.Set;
-
-import javax.transaction.Transactional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-
 import ir.darkdeveloper.sma.model.UserRoles;
 import ir.darkdeveloper.sma.repository.UserRolesRepo;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.util.List;
+
+import static ir.darkdeveloper.sma.utils.Generics.exceptionHandlers;
 
 @Service
+@RequiredArgsConstructor
 public class UserRolesService {
 
     private final UserRolesRepo repo;
 
-    @Autowired
-    public UserRolesService(UserRolesRepo repo) {
-        this.repo = repo;
-    }
-
     @Transactional
-    public ResponseEntity<?> saveRole(UserRoles role) {
-        try {
-            repo.save(role);
-
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-        return new ResponseEntity<>(HttpStatus.OK);
+    public UserRoles saveRole(UserRoles role) {
+        return exceptionHandlers(() -> repo.save(role));
     }
 
 
-	public List<UserRoles> getAllRoles() {
-		return repo.findAll();
-	}
-
-    public List<UserRoles> getRole(String name){
-        return repo.findByName(name);
+    public List<UserRoles> getAllRoles() {
+        return exceptionHandlers(repo::findAll);
     }
 
-	public ResponseEntity<?> deleteRole(Long id) {
-		try {
+    public UserRoles getRoles(String name) {
+        return exceptionHandlers(() -> repo.findByName(name));
+    }
+
+    public String deleteRole(Long id) {
+        return exceptionHandlers(() -> {
             repo.deleteById(id);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-        return new ResponseEntity<>(HttpStatus.OK);
-	}
+            return "deleted";
+        });
+    }
 
-    public Boolean exists(String name){
-        if(repo.getUSER(name) != null){
-            return true;
-        }
-        return false;
+    public Boolean exists(String name) {
+        return repo.getUSER(name) != null;
     }
 
 }

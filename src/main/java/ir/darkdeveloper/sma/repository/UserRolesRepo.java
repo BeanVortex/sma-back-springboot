@@ -16,7 +16,7 @@ import ir.darkdeveloper.sma.model.UserRoles;
 public interface UserRolesRepo extends JpaRepository<UserRoles, Long>{
 
     
-    List<UserRoles> findByName(String name);
+    UserRoles findByName(String name);
 
     @Query("SELECT model FROM UserRoles model WHERE model.name = :name")
     UserRoles getUSER(@Param("name") String name);

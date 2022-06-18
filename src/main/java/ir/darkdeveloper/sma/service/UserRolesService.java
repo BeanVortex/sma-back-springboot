@@ -38,7 +38,7 @@ public class UserRolesService {
     }
 
     public Boolean exists(String name) {
-        return repo.getUSER(name) != null;
+        return exceptionHandlers(() -> repo.getUSER(name) != null);
     }
 
 }

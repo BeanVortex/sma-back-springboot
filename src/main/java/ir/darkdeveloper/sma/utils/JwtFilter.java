@@ -1,99 +1,95 @@
 package ir.darkdeveloper.sma.utils;
 
-import java.io.IOException;
+import ir.darkdeveloper.sma.exceptions.NoContentException;
+import ir.darkdeveloper.sma.model.RefreshModel;
+import ir.darkdeveloper.sma.service.RefreshService;
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
-import org.springframework.web.filter.OncePerRequestFilter;
-
-import ir.darkdeveloper.sma.model.RefreshModel;
-import ir.darkdeveloper.sma.service.RefreshService;
+import java.io.IOException;
+import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Lazy))
 public class JwtFilter extends OncePerRequestFilter {
 
-    private final JwtUtils jwtUtils;
+    @Lazy
     private final UserUtils userUtils;
+    private final JwtUtils jwtUtils;
     private final RefreshService refreshService;
-    private final AdminUserProperties adminUserProperties;
 
-    public JwtFilter(@Lazy UserUtils userUtils, JwtUtils jwtUtils, RefreshService refreshService,
-                     AdminUserProperties adminUserProperties) {
-
-        this.jwtUtils = jwtUtils;
-        this.userUtils = userUtils;
-        this.refreshService = refreshService;
-        this.adminUserProperties = adminUserProperties;
-    }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request,
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain)
             throws ServletException, IOException {
-        //String token = request.getHeader("Authorization");
 
-        String refreshToken = request.getHeader("refresh_token");
-        String accessToken = request.getHeader("access_token");
+        var refreshToken = Optional.ofNullable(request.getHeader("refresh_token"));
+        var accessToken = Optional.ofNullable(request.getHeader("access_token"));
 
-        if (refreshToken != null && accessToken != null) {
-            String username = jwtUtils.getUsername(refreshToken);
 
-            Long userId = username.equals(adminUserProperties.username()) ? adminUserProperties.id()
-                    : userUtils.getUserIdByUsernameOrEmail(username);
+        if (refreshToken.isPresent() && accessToken.isPresent()
+                && !jwtUtils.isTokenExpired(refreshToken.get())) {
 
-            String storedAccessToken = refreshService.getRefreshByUserId(userId).getAccessToken();
-            String storedRefreshToken = refreshService.getRefreshByUserId(userId).getRefreshToken();
-            if (storedAccessToken != null && storedRefreshToken != null && accessToken.equals(storedAccessToken)
-                    && refreshToken.equals(storedRefreshToken) && !jwtUtils.isTokenExpired(storedRefreshToken)) {
-
-                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-                if (username != null && auth == null) {
-                    var userDetails = userUtils.loadUserByUsername(username).orElseThrow();
-                    UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(userDetails,
-                            null, userDetails.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(upToken);
-                    String newAccessToken = jwtUtils.generateAccessToken(username);
-                    RefreshModel refreshModel = new RefreshModel();
-                    refreshModel.setAccessToken(newAccessToken);
-                    refreshModel.setRefreshToken(storedRefreshToken);
-                    refreshModel.setUserId(userId);
-                    if (username.equals(adminUserProperties.username())) {
-                        refreshModel.setId(refreshService.getIdByUserId(adminUserProperties.id()));
-                        response.addHeader("user_id", "" + refreshModel.getId());
-                    } else {
-                        refreshModel
-                                .setId(refreshService.getIdByUserId(userUtils.getUserIdByUsernameOrEmail(username)));
-                    }
-                    refreshService.saveToken(refreshModel);
-                    response.addHeader("access_token", newAccessToken);
-                    response.addHeader("refresh_token", refreshToken);
-                }
-
-            }
+            var username = jwtUtils.getUsername(refreshToken.get());
+            var userId = ((Integer) jwtUtils.getAllClaimsFromToken(refreshToken.get())
+                    .get("user_id")).longValue();
+            authenticateUser(username);
+            setUpHeader(response, accessToken.get(), username, userId);
         }
 
         filterChain.doFilter(request, response);
     }
 
-    /*     public boolean userAdminEndpointCheck(HttpServletRequest request, UserDetails model){
-        String endPoint = request.getRequestURI();
-        switch(endPoint){
-            case "/api/user/role/":
-            return model.getAuthorities().contains(Authority.OP_ACCESS_ROLE);
-            case "/api/user/update/":
-            return model.getAuthorities().contains(Authority.OP_ACCESS_ROLE);
+
+    private void authenticateUser(String username) {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (username != null && auth == null) {
+            //db query
+            var userDetails = userUtils.loadUserByUsername(username)
+                    .orElseThrow(() -> new NoContentException("User does not exist"));
+            var upToken = new UsernamePasswordAuthenticationToken(userDetails, null,
+                    userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(upToken);
+
         }
-    } */
+    }
+
+    private void setUpHeader(HttpServletResponse response, String accessToken, String username,
+                             Long userId) {
+
+
+        // if this didn't execute, it means the access token is still valid
+        if (jwtUtils.isTokenExpired(accessToken)) {
+            //db query
+            var storedRefreshModel = refreshService.getRefreshByUserId(userId);
+            var storedAccessToken = storedRefreshModel.getAccessToken();
+            if (accessToken.equals(storedAccessToken)) {
+                var newAccessToken = jwtUtils.generateAccessToken(username);
+                var refreshModel = new RefreshModel();
+                refreshModel.setAccessToken(newAccessToken);
+                refreshModel.setUserId(userId);
+                refreshModel.setId(storedRefreshModel.getId());
+                // db query
+                refreshService.saveToken(refreshModel);
+                response.addHeader("access_token", newAccessToken);
+            } else
+                //if stored token is not equal with user send token, it will return 403
+                SecurityContextHolder.getContext().setAuthentication(null);
+
+        }
+    }
+
 
 }

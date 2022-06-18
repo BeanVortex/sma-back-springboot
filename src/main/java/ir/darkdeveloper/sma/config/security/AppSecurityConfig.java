@@ -3,6 +3,7 @@ package ir.darkdeveloper.sma.config.security;
 import java.util.Arrays;
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,16 +26,13 @@ import ir.darkdeveloper.sma.service.UserService;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
+@RequiredArgsConstructor(onConstructor = @__(@Lazy))
 public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
 
+    @Lazy
     private final UserService userService;
+    @Lazy
     private final JwtFilter jwtFilter;
-
-    @Autowired
-    public AppSecurityConfig(@Lazy UserService userService, @Lazy JwtFilter jwtFilter) {
-        this.userService = userService;
-        this.jwtFilter = jwtFilter;
-    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {

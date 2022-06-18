@@ -3,30 +3,29 @@ package ir.darkdeveloper.sma.service;
 
 import ir.darkdeveloper.sma.model.RefreshModel;
 import ir.darkdeveloper.sma.repository.RefreshRepo;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 
+import static ir.darkdeveloper.sma.utils.Generics.exceptionHandlers;
+
 @Service
+@RequiredArgsConstructor
 public class RefreshService {
 
     private final RefreshRepo repo;
 
-    @Autowired
-    public RefreshService(RefreshRepo repo) {
-        this.repo = repo;
-    }
-
     @Transactional
-    public RefreshModel saveToken(RefreshModel model) {
-        return repo.save(model);
+    public void saveToken(RefreshModel model) {
+        exceptionHandlers(() -> repo.save(model));
     }
 
     public RefreshModel updateTokenByUserId(Long userId, String accessToken) {
         return repo.updateTokenByUserId(userId, accessToken);
     }
 
+    @Transactional
     public void deleteTokenByUserId(Long id) {
         repo.deleteTokenByUserId(id);
     }

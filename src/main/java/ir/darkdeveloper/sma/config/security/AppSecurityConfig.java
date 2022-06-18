@@ -31,7 +31,7 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtFilter jwtFilter;
 
     @Autowired
-    public AppSecurityConfig(@Lazy UserService userService, JwtFilter jwtFilter) {
+    public AppSecurityConfig(@Lazy UserService userService, @Lazy JwtFilter jwtFilter) {
         this.userService = userService;
         this.jwtFilter = jwtFilter;
     }

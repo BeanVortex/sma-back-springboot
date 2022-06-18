@@ -26,12 +26,15 @@ public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtils;
     private final UserUtils userUtils;
     private final RefreshService refreshService;
+    private final AdminUserProperties adminUserProperties;
 
-    public JwtFilter(@Lazy UserUtils userUtils, JwtUtils jwtUtils, RefreshService refreshService) {
+    public JwtFilter(@Lazy UserUtils userUtils, JwtUtils jwtUtils, RefreshService refreshService,
+                     AdminUserProperties adminUserProperties) {
 
         this.jwtUtils = jwtUtils;
         this.userUtils = userUtils;
         this.refreshService = refreshService;
+        this.adminUserProperties = adminUserProperties;
     }
 
     @Override
@@ -45,7 +48,7 @@ public class JwtFilter extends OncePerRequestFilter {
         if (refreshToken != null && accessToken != null) {
             String username = jwtUtils.getUsername(refreshToken);
 
-            Long userId = username.equals(userUtils.getAdminUsername()) ? userUtils.getAdminId()
+            Long userId = username.equals(adminUserProperties.username()) ? adminUserProperties.id()
                     : userUtils.getUserIdByUsernameOrEmail(username);
 
             String storedAccessToken = refreshService.getRefreshByUserId(userId).getAccessToken();
@@ -56,7 +59,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
                 if (username != null && auth == null) {
-                    UserDetails userDetails = userUtils.loadUserByUsername(username);
+                    var userDetails = userUtils.loadUserByUsername(username).orElseThrow();
                     UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(userDetails,
                             null, userDetails.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(upToken);
@@ -65,8 +68,8 @@ public class JwtFilter extends OncePerRequestFilter {
                     refreshModel.setAccessToken(newAccessToken);
                     refreshModel.setRefreshToken(storedRefreshToken);
                     refreshModel.setUserId(userId);
-                    if (username.equals(userUtils.getAdminUsername())) {
-                        refreshModel.setId(refreshService.getIdByUserId(userUtils.getAdminId()));
+                    if (username.equals(adminUserProperties.username())) {
+                        refreshModel.setId(refreshService.getIdByUserId(adminUserProperties.id()));
                         response.addHeader("user_id", "" + refreshModel.getId());
                     } else {
                         refreshModel

@@ -2,7 +2,7 @@ package ir.darkdeveloper.sma.service;
 
 import ir.darkdeveloper.sma.exceptions.BadRequestException;
 import ir.darkdeveloper.sma.exceptions.ForbiddenException;
-import ir.darkdeveloper.sma.exceptions.InternalException;
+import ir.darkdeveloper.sma.exceptions.NoContentException;
 import ir.darkdeveloper.sma.model.Authority;
 import ir.darkdeveloper.sma.model.CommentModel;
 import ir.darkdeveloper.sma.repository.CommentRepo;
@@ -18,7 +18,8 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.Optional;
-import java.util.function.Supplier;
+
+import static ir.darkdeveloper.sma.utils.Generics.exceptionHandlers;
 
 @Service
 @RequiredArgsConstructor
@@ -43,10 +44,11 @@ public class CommentService {
             var comment = model.orElseThrow(() -> new BadRequestException("Comment can't be null"));
             var auth = SecurityContextHolder.getContext().getAuthentication();
 
-            var userModel = userRepo
-                    .findUserById(postRepo.findPostById(comment.getPost().getId()).getUser().getId());
+            var user = userRepo
+                    .findUserById(postRepo.findPostById(comment.getPost().getId()).getUser().getId())
+                    .orElseThrow(() -> new NoContentException("User not found"));
 
-            if (auth.getName().equals(userModel.getEmail())
+            if (auth.getName().equals(user.getEmail())
                     || auth.getAuthorities().contains(Authority.OP_DELETE_COMMENT)) {
                 commentRepo.deleteById(comment.getId());
                 return new ResponseEntity<>("Deleted", HttpStatus.OK);
@@ -62,15 +64,5 @@ public class CommentService {
                 pageable));
     }
 
-    private <T> T exceptionHandlers(Supplier<T> sup) {
-        try {
-            return sup.get();
-        } catch (ForbiddenException e) {
-            throw new ForbiddenException(e);
-        } catch (BadRequestException e) {
-            throw new BadRequestException(e);
-        } catch (Exception e) {
-            throw new InternalException(e);
-        }
-    }
+
 }

@@ -2,10 +2,15 @@ package ir.darkdeveloper.sma.service;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.function.Supplier;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
+import ir.darkdeveloper.sma.exceptions.BadRequestException;
+import ir.darkdeveloper.sma.exceptions.ForbiddenException;
+import ir.darkdeveloper.sma.exceptions.InternalException;
+import ir.darkdeveloper.sma.exceptions.NoContentException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,8 +51,12 @@ public class PostService {
     public ResponseEntity<?> savePost(HttpServletRequest request, PostModel model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         userUtils.setUserIdForPost(request, model);
-        if (auth.getName().equals(userRepo.findUserById(model.getUser().getId()).getEmail())
-                || auth.getName().equals(userRepo.findUserById(model.getUser().getId()).getUserName())) {
+        var user = userRepo
+                .findUserById(model.getUser().getId())
+                .orElseThrow(() -> new NoContentException("User not found"));
+
+        if (auth.getName().equals(user.getEmail())
+                || auth.getName().equals(user.getUserName())) {
 
             try {
                 // For updating Post img by deleting previous img and replacing with new one and
@@ -62,10 +71,7 @@ public class PostService {
                     model.setImage(preModel.getImage());
                 }
 
-                String fileName = ioUtils.saveFile(model.getFile(), path);
-                if (fileName != null) {
-                    model.setImage(fileName);
-                }
+                ioUtils.saveFile(model.getFile(), path).ifPresent(model::setImage);
                 postRepo.save(model);
                 return new ResponseEntity<>(HttpStatus.OK);
 
@@ -100,7 +106,8 @@ public class PostService {
     public ResponseEntity<?> deletePost(HttpServletRequest request, PostModel post) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         userUtils.setUserIdForPost(request, post);
-        UserModel userModel = userRepo.findUserById(post.getUser().getId());
+        var userModel = userRepo.findUserById(post.getUser().getId())
+                .orElseThrow(() -> new NoContentException("User not found"));
         if (auth.getName().equals(userModel.getEmail()) || auth.getAuthorities().contains(Authority.OP_DELETE_POST)) {
             try {
                 PostModel model = postRepo.findPostById(post.getId());
@@ -125,6 +132,18 @@ public class PostService {
     public Page<PostModel> getOneUserPosts(Long userId, Pageable pageable) {
     
         return postRepo.getOneUserPosts(userId, pageable);
+    }
+
+    private <T> T exceptionHandlers(Supplier<T> sup) {
+        try {
+            return sup.get();
+        } catch (ForbiddenException e) {
+            throw new ForbiddenException(e);
+        } catch (BadRequestException e) {
+            throw new BadRequestException(e);
+        } catch (Exception e) {
+            throw new InternalException(e);
+        }
     }
 
 }

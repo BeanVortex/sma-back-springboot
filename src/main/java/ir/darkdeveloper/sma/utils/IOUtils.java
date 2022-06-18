@@ -1,42 +1,97 @@
 package ir.darkdeveloper.sma.utils;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.UUID;
-
+import ir.darkdeveloper.sma.model.PostModel;
+import ir.darkdeveloper.sma.model.UserModel;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+
 @Component
 public class IOUtils {
-    
+
+    private static final String DEFAULT_PROFILE_IMAGE = "noProfile.jpeg";
+    public static final String USER_IMAGE_PATH = "classpath:static/img/profiles/";
+    public static final String POST_IMAGE_PATH = "classpath:static/img/posts/";
+
+
     /**
-     * 
-     * @param file MultipartFile
-     * @param path after img/
-     * @return saved file name or null if file is null
-     * @throws IOException io
+     * @return a saved file name or empty if file is null
      */
-    public String saveFile(MultipartFile file, String path) throws IOException {
+    public Optional<String> saveFile(MultipartFile file, String path) {
         if (file != null) {
-            // first it may not upload and save file in the path. should create static/img
+            // first it may not upload and save file in the path. should create static/img/profiles/ and static/img/posts
             // folder in resources
-            String location = ResourceUtils.getFile("classpath:static/img/" + path).getAbsolutePath();
-            byte[] bytes = file.getBytes();
-            String fileName = UUID.randomUUID() + "." + file.getContentType().split("/")[1];
-            Files.write(Paths.get(location + File.separator + fileName), bytes);
-            return fileName;
+            try {
+                var location = ResourceUtils.getFile(path).getAbsolutePath();
+
+                var bytes = file.getBytes();
+                var fileName = UUID.randomUUID() + "." +
+                        Objects.requireNonNull(file.getContentType()).split("/")[1];
+                Files.write(Paths.get(location + File.separator + fileName), bytes);
+
+                return Optional.of(fileName);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
-        return null;
+        return Optional.empty();
     }
 
 
-    public String getImagePath(ImageUtil model, String path) throws Exception{
-        return ResourceUtils.getFile("classpath:static/img/" + path).getAbsolutePath() + File.separator
-                        + model.getImage();
+    public String getImagePath(ImageUtil model, String defaultDirPath) {
+        try {
+            return ResourceUtils.getFile(defaultDirPath).getAbsolutePath() + File.separator + model.getImage();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
+
+    public void deleteUserImages(UserModel user) {
+        if (!user.getImage().equals(DEFAULT_PROFILE_IMAGE))
+            deleteAnImage(user, USER_IMAGE_PATH);
+    }
+
+    public void deletePostImagesOfUser(PostModel post) {
+        if (post.getImage() != null) {
+            deleteAnImage(post, POST_IMAGE_PATH);
+        }
+    }
+
+    private void deleteAnImage(ImageUtil model, String path) {
+        var imgPath = getImagePath(model, path);
+        if (imgPath != null)
+            deleteAFile(imgPath);
+    }
+
+    public void deleteAFile(String path) {
+        try {
+            Files.delete(Paths.get(path));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public void saveUserImages(UserModel user) {
+
+
+        var profileFileExists = user.getFile() != null;
+
+        if (!profileFileExists) {
+            user.setProfilePicture(DEFAULT_PROFILE_IMAGE);
+            return;
+        }
+
+        saveFile(user.getFile(), USER_IMAGE_PATH).ifPresent(user::setProfilePicture);
+
+    }
 }

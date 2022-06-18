@@ -1,18 +1,20 @@
 package ir.darkdeveloper.sma.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import ir.darkdeveloper.sma.utils.ImageUtil;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
-import java.io.Serial;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,37 +28,46 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class UserModel implements UserDetails, ImageUtil {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
+public class UserModel implements UserDetails, ImageUtil, UpdateModel<UserModel> {
 
     @Id
     @GeneratedValue
     private Long id;
 
     @Column(nullable = false, unique = true)
+    @Email
     private String email;
 
     @Column(unique = true)
+    @NotEmpty
+    @Size(min = 5)
     private String userName;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(nullable = false)
     private String password;
+
+    @Transient
+    @Column(nullable = false)
+    private String passwordRepeat;
+
+    @Transient
+    private String prevPassword;
 
     private Boolean enabled = true;
 
     @Transient
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private MultipartFile file;
 
     @Column(name = "profile")
     private String profilePicture;
 
+    @OneToMany(mappedBy = "user")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<PostModel> posts;
+
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role", referencedColumnName = "name"))
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JoinTable(joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "role", referencedColumnName = "name"))
     private List<UserRoles> roles;
 
     @CreationTimestamp
@@ -85,33 +96,28 @@ public class UserModel implements UserDetails, ImageUtil {
         this.userName = userName;
     }
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<GrantedAuthority> auth = new ArrayList<>();
+        var auth = new ArrayList<GrantedAuthority>();
         roles.forEach(e -> auth.addAll(e.getAuthorities()));
         return auth;
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public boolean isEnabled() {
         return this.getEnabled();
@@ -122,4 +128,13 @@ public class UserModel implements UserDetails, ImageUtil {
         return profilePicture;
     }
 
+    @Override
+    public void update(UserModel model) {
+        id = model.id != null || id == null ? model.id : id;
+        userName = model.userName != null || userName == null ? model.userName : userName;
+        enabled = model.enabled != null || enabled == null ? model.enabled : enabled;
+        profilePicture = model.profilePicture != null || profilePicture == null ? model.profilePicture : profilePicture;
+        createdAt = model.createdAt != null || createdAt == null ? model.createdAt : createdAt;
+        updatedAt = model.updatedAt != null || updatedAt == null ? model.updatedAt : updatedAt;
+    }
 }

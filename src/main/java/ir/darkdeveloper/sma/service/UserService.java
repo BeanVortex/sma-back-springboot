@@ -1,117 +1,104 @@
 package ir.darkdeveloper.sma.service;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.transaction.Transactional;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import ir.darkdeveloper.sma.dto.LoginDto;
+import ir.darkdeveloper.sma.exceptions.BadRequestException;
+import ir.darkdeveloper.sma.exceptions.ForbiddenException;
+import ir.darkdeveloper.sma.exceptions.NoContentException;
+import ir.darkdeveloper.sma.model.UserModel;
+import ir.darkdeveloper.sma.repository.UserRepo;
+import ir.darkdeveloper.sma.utils.IOUtils;
+import ir.darkdeveloper.sma.utils.JwtUtils;
+import ir.darkdeveloper.sma.utils.PasswordUtils;
+import ir.darkdeveloper.sma.utils.UserUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import ir.darkdeveloper.sma.dto.JwtAuth;
-import ir.darkdeveloper.sma.model.Authority;
-import ir.darkdeveloper.sma.model.UserModel;
-import ir.darkdeveloper.sma.repository.UserRepo;
-import ir.darkdeveloper.sma.utils.UserUtils;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
+import java.util.Optional;
+
+import static ir.darkdeveloper.sma.utils.Generics.exceptionHandlers;
 
 @Service("userService")
+@RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
     private final UserRepo repo;
     private final UserUtils userUtils;
-
-    @Autowired
-    public UserService(UserRepo repo, UserRolesService roleService, UserUtils userUtils) {
-        this.repo = repo;
-        this.userUtils = userUtils;
-    }
+    private final JwtUtils jwtUtils;
+    private final IOUtils ioUtils;
+    private final RefreshService refreshService;
+    private final PasswordUtils passwordUtils;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userUtils.loadUserByUsername(username);
+        return userUtils.loadUserByUsername(username)
+                .orElseThrow(() -> new NoContentException("User wasn't found"));
     }
 
     @Transactional
-    public UserModel updateUser(UserModel model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!auth.getName().equals("anonymousUser") || auth.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
-                || auth.getName().equals(model.getEmail())) {
-            try {
-                userUtils.validateUserData(model);
-                return repo.save(model);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return null;
+    public UserModel updateUser(Optional<UserModel> model, HttpServletRequest req) {
+        return exceptionHandlers(() -> {
+            var user = model.orElseThrow(() -> new BadRequestException("User can't be null"));
+            var id = model.map(UserModel::getId).orElseThrow(() -> new BadRequestException("body or id of user can't be null"));
+            checkUserIsSameUserForRequest(model.get().getId(), req, "update");
+            var foundUser = repo.findById(id).orElseThrow(() -> new NoContentException("User not found"));
+
+            if (user.getFile() != null)
+                ioUtils.saveFile(user.getFile(), IOUtils.USER_IMAGE_PATH).ifPresent(foundUser::setProfilePicture);
+
+            passwordUtils.updatePasswordUsingPrevious(Optional.of(user), foundUser);
+            foundUser.update(user);
+            return repo.save(foundUser);
+        });
     }
 
     @Transactional
-    @PreAuthorize("authentication.name == this.getAdminUsername() || #user.getEmail() == authentication.name")
-    public ResponseEntity<?> deleteUser(UserModel user) {
-        try {
-            UserModel model = repo.findUserById(user.getId());
-            userUtils.deleteUser(model);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+    public String deleteUser(Long id, HttpServletRequest req) {
+        return exceptionHandlers(() -> {
+            var user = repo.findUserById(id)
+                    .orElseThrow(() -> new NoContentException("User does not exist"));
+            checkUserIsSameUserForRequest(id, req, "delete");
+
+            ioUtils.deleteUserImages(user);
+            user.getPosts().forEach(ioUtils::deletePostImagesOfUser);
+
+            refreshService.deleteTokenByUserId(user.getId());
+            repo.deleteById(user.getId());
+            return "deleted";
+        });
     }
 
-    @PreAuthorize("hasAnyAuthority('OP_ACCESS_ADMIN','OP_ACCESS_USER')")
-    public Page<UserModel> allUsers(Pageable pageable) {
-        return repo.findAll(pageable);
+    public Page<UserModel> findAll(Pageable pageable) {
+        return exceptionHandlers(() -> repo.findAll(pageable));
     }
 
-    public ResponseEntity<?> loginUser(JwtAuth model, HttpServletResponse response) {
-
-        try {
-            if (model.username().equals(userUtils.getAdminUsername())) {
-                userUtils.authenticateUser(model, null, null, response);
-            } else {
-                userUtils.authenticateUser(model, userUtils.getUserIdByUsernameOrEmail(model.username()), null,
-                        response);
-            }
-            return new ResponseEntity<>(repo.findByEmailOrUsername(model.username()), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+    public UserModel loginUser(Optional<LoginDto> loginDto, HttpServletResponse res) {
+        return exceptionHandlers(() -> userUtils.authenticateUser(loginDto, res));
     }
 
-    public ResponseEntity<?> signUpUser(UserModel model, HttpServletResponse response) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getName().equals("anonymousUser") || auth.getAuthorities().contains(Authority.OP_ACCESS_ADMIN)
-                || !auth.getName().equals(model.getEmail())) {
-            try {
-
-                if (model.getUserName() != null && model.getUserName().equals(userUtils.getAdminUsername())) {
-                    return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
-                }
-                String rawPass = model.getPassword();
-                userUtils.validateUserData(model);
-                repo.save(model);
-                JwtAuth jwtAuth = new JwtAuth(model.getEmail(), model.getPassword());
-                userUtils.authenticateUser(jwtAuth, model.getId(), rawPass, response);
-                return new ResponseEntity<>(repo.findByEmailOrUsername(model.getUsername()), HttpStatus.OK);
-            } catch (Exception e) {
-                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-            }
-        }
-        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    @Transactional
+    public UserModel signUpUser(Optional<UserModel> model, HttpServletResponse res) {
+        return exceptionHandlers(() -> userUtils.signup(model, res));
     }
 
-    @PreAuthorize("hasAnyAuthority('OP_ACCESS_ADMIN','OP_ACCESS_USER')")
     public UserModel getUserInfo(UserModel model) {
-        return repo.findUserById(model.getId());
+        return repo.findUserById(model.getId()).orElseThrow(() -> new NoContentException("User wasn't found"));
     }
 
+    private void checkUserIsSameUserForRequest(Long userId, HttpServletRequest req, String operation) {
+        var token = req.getHeader("refresh_token");
+        if (!jwtUtils.isTokenExpired(token)) {
+            var id = jwtUtils.getUserId(token);
+            if (!userId.equals(id))
+                throw new ForbiddenException("You can't " + operation + " another user's posts");
+        } else
+            throw new ForbiddenException("You are logged out. Try logging in again");
+    }
 }

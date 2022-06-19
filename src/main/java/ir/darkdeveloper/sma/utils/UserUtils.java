@@ -74,6 +74,7 @@ public class UserUtils {
         var refreshToken = jwtUtils.generateRefreshToken(username, rModel.getUserId());
 
         rModel.setAccessToken(accessToken);
+        rModel.setRefreshToken(refreshToken);
         refreshService.saveToken(rModel);
 
         setupHeader(response, accessToken, refreshToken);

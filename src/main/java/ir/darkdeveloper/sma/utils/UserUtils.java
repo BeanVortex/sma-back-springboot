@@ -101,18 +101,6 @@ public class UserUtils {
     }
 
 
-    public void setUserIdForPost(HttpServletRequest request, PostModel post) {
-        var token = request.getHeader("refresh_token");
-        if (token != null) {
-            var userId = getUserIdByUsernameOrEmail(jwtUtils.getUsername(token));
-            if (userId != null) {
-                post.setUser(new UserModel());
-                post.getUser().setId(userId);
-            }
-        }
-
-    }
-
 
     public void setupHeader(HttpServletResponse response, String accessToken, String refreshToken) {
         var date = jwtUtils.getExpirationDate(refreshToken);

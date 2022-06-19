@@ -2,6 +2,7 @@ package ir.darkdeveloper.sma.service;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import javax.servlet.http.HttpServletRequest;
@@ -11,6 +12,8 @@ import ir.darkdeveloper.sma.exceptions.BadRequestException;
 import ir.darkdeveloper.sma.exceptions.ForbiddenException;
 import ir.darkdeveloper.sma.exceptions.InternalException;
 import ir.darkdeveloper.sma.exceptions.NoContentException;
+import ir.darkdeveloper.sma.utils.JwtUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,60 +32,33 @@ import ir.darkdeveloper.sma.repository.UserRepo;
 import ir.darkdeveloper.sma.utils.IOUtils;
 import ir.darkdeveloper.sma.utils.UserUtils;
 
+import static ir.darkdeveloper.sma.utils.Generics.exceptionHandlers;
+import static ir.darkdeveloper.sma.utils.IOUtils.POST_IMAGE_PATH;
+
 @Service
+@RequiredArgsConstructor
 public class PostService {
 
     private final PostRepo postRepo;
     private final UserRepo userRepo;
     private final IOUtils ioUtils;
     private final UserUtils userUtils;
-    private final String path = "posts/";
-
-    @Autowired
-    public PostService(PostRepo postRepo, UserRepo userRepo, IOUtils ioUtils, UserUtils userUtils) {
-        this.postRepo = postRepo;
-        this.userRepo = userRepo;
-        this.ioUtils = ioUtils;
-        this.userUtils = userUtils;
-    }
+    private final RefreshService refreshService;
+    private final JwtUtils jwtUtils;
 
     @Transactional
-    @PreAuthorize("authentication.name != 'anonymousUser'")
-    public ResponseEntity<?> savePost(HttpServletRequest request, PostModel model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        userUtils.setUserIdForPost(request, model);
-        var user = userRepo
-                .findUserById(model.getUser().getId())
-                .orElseThrow(() -> new NoContentException("User not found"));
-
-        if (auth.getName().equals(user.getEmail())
-                || auth.getName().equals(user.getUserName())) {
-
-            try {
-                // For updating Post img by deleting previous img and replacing with new one and
-                // new name
-
-                PostModel preModel = postRepo.findPostById(model.getId());
-                if (model.getId() != null && model.getFile() != null) {
-                    Files.delete(Paths.get(ioUtils.getImagePath(preModel, path)));
-                }
-                // in case when updated with no img and then updating with img
-                if (preModel != null && preModel.getImage() != null) {
-                    model.setImage(preModel.getImage());
-                }
-
-                ioUtils.saveFile(model.getFile(), path).ifPresent(model::setImage);
-                postRepo.save(model);
-                return new ResponseEntity<>(HttpStatus.OK);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-            }
-        }
-        return new ResponseEntity<>("You can't do this action", HttpStatus.FORBIDDEN);
+    public PostModel savePost(Optional<PostModel> postModel, HttpServletRequest req) {
+        return exceptionHandlers(() -> {
+            var userId = checkUserIsSameUserForRequest(req, "save");
+            var post = postModel.orElseThrow(() -> new BadRequestException("Post can't be null"));
+            postModel.map(PostModel::getId).ifPresent(id -> post.setId(null));
+            post.setUser(new UserModel(userId));
+            ioUtils.saveFile(post.getFile(), POST_IMAGE_PATH).ifPresent(post::setImage);
+            return postRepo.save(post);
+        });
     }
 
+    // TODO
     @PreAuthorize("authentication.name != 'anonymousUser'")
     public ResponseEntity<?> newLike(PostModel model) {
 
@@ -105,14 +81,14 @@ public class PostService {
     @Transactional
     public ResponseEntity<?> deletePost(HttpServletRequest request, PostModel post) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        userUtils.setUserIdForPost(request, post);
+//        userUtils.setUserIdForPost(request, post);
         var userModel = userRepo.findUserById(post.getUser().getId())
                 .orElseThrow(() -> new NoContentException("User not found"));
         if (auth.getName().equals(userModel.getEmail()) || auth.getAuthorities().contains(Authority.OP_DELETE_POST)) {
             try {
                 PostModel model = postRepo.findPostById(post.getId());
 
-                Files.delete(Paths.get(ioUtils.getImagePath(model, path)));
+                Files.delete(Paths.get(ioUtils.getImagePath(model, POST_IMAGE_PATH)));
                 postRepo.deleteById(post.getId());
                 return new ResponseEntity<>(HttpStatus.OK);
 
@@ -130,20 +106,22 @@ public class PostService {
     }
 
     public Page<PostModel> getOneUserPosts(Long userId, Pageable pageable) {
-    
+
         return postRepo.getOneUserPosts(userId, pageable);
     }
 
-    private <T> T exceptionHandlers(Supplier<T> sup) {
-        try {
-            return sup.get();
-        } catch (ForbiddenException e) {
-            throw new ForbiddenException(e);
-        } catch (BadRequestException e) {
-            throw new BadRequestException(e);
-        } catch (Exception e) {
-            throw new InternalException(e);
-        }
+
+    private Long checkUserIsSameUserForRequest(HttpServletRequest req, String operation) {
+        var token = req.getHeader("refresh_token");
+        if (!jwtUtils.isTokenExpired(token)) {
+            var id = jwtUtils.getUserId(token);
+            // db query
+            var fetchedId = refreshService.getUserIdByRefreshToken(token);
+            if (!fetchedId.equals(id))
+                throw new ForbiddenException("You can't " + operation + " another user's posts");
+            return id;
+        } else
+            throw new ForbiddenException("You are logged out. Try logging in again");
     }
 
 }

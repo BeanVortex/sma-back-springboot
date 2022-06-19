@@ -63,6 +63,7 @@ public class UserModel implements UserDetails, ImageUtil, UpdateModel<UserModel>
 
     @OneToMany(mappedBy = "user")
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @ToString.Exclude
     private List<PostModel> posts;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -77,6 +78,10 @@ public class UserModel implements UserDetails, ImageUtil, UpdateModel<UserModel>
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    public UserModel(Long id) {
+        this.id = id;
+    }
 
     @Override
     public String getPassword() {

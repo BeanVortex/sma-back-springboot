@@ -1,5 +1,7 @@
 spring:
   profiles.active: dev
+  profiles:
+    include: admin
 ---
 jwt:
   secretKey: RandomSecret
@@ -25,10 +27,6 @@ spring:
     url: jdbc:postgresql://localhost:5432/sma
     username: darkdeveloper
     password: 1234
-  security:
-    user:
-      name: ENC(1hak+QtSRqr4mBHZJYSx2mUT8bchOLpf)
-      password: ENC(G1d9E+0lFVNTXE6CYoATcA==)
   banner:
     location: classpath:banners/banner3
     # width:

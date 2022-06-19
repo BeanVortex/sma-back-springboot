@@ -1,6 +1,7 @@
 package ir.darkdeveloper.sma.service;
 
 
+import ir.darkdeveloper.sma.exceptions.ForbiddenException;
 import ir.darkdeveloper.sma.model.RefreshModel;
 import ir.darkdeveloper.sma.repository.RefreshRepo;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,11 @@ public class RefreshService {
 
     public RefreshModel getRefreshByUserId(Long id) {
         return repo.getRefreshByUserId(id);
+    }
+
+    public Long getUserIdByRefreshToken(String token) {
+        return repo.findUserIdByRefreshToken(token)
+                .orElseThrow(() -> new ForbiddenException("You can't do this action"));
     }
 
     public Long getIdByUserId(Long adminId) {

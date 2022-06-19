@@ -40,9 +40,7 @@ import static ir.darkdeveloper.sma.utils.IOUtils.POST_IMAGE_PATH;
 public class PostService {
 
     private final PostRepo postRepo;
-    private final UserRepo userRepo;
     private final IOUtils ioUtils;
-    private final UserUtils userUtils;
     private final RefreshService refreshService;
     private final JwtUtils jwtUtils;
 
@@ -63,14 +61,14 @@ public class PostService {
     public ResponseEntity<?> newLike(PostModel model) {
 
         Long id = model.getId();
-        PostModel model2 = postRepo.findPostById(id);
+        PostModel model2 = postRepo.findPostById(id).orElseThrow(() -> new NoContentException("Post not found"));
         Long likes = model2.getLikes();
         model2.setLikes(++likes);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Transactional
-    public Page<PostModel> allPosts(Pageable pageable) {
+    public Page<PostModel> findAll(Pageable pageable) {
         return postRepo.findAll(pageable);
     }
 
@@ -79,34 +77,22 @@ public class PostService {
     }
 
     @Transactional
-    public ResponseEntity<?> deletePost(HttpServletRequest request, PostModel post) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//        userUtils.setUserIdForPost(request, post);
-        var userModel = userRepo.findUserById(post.getUser().getId())
-                .orElseThrow(() -> new NoContentException("User not found"));
-        if (auth.getName().equals(userModel.getEmail()) || auth.getAuthorities().contains(Authority.OP_DELETE_POST)) {
-            try {
-                PostModel model = postRepo.findPostById(post.getId());
-
-                Files.delete(Paths.get(ioUtils.getImagePath(model, POST_IMAGE_PATH)));
-                postRepo.deleteById(post.getId());
-                return new ResponseEntity<>(HttpStatus.OK);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-            }
-        } else {
-            return new ResponseEntity<>("You can't do this action", HttpStatus.FORBIDDEN);
-        }
+    public String deletePost(Long id, HttpServletRequest req) {
+        return exceptionHandlers(() -> {
+            checkUserIsSameUserForRequest(req, "delete");
+            var post = postRepo.findPostById(id)
+                    .orElseThrow(() -> new NoContentException("Post not found"));
+            ioUtils.deletePostImagesOfUser(post);
+            postRepo.deleteById(id);
+            return "deleted";
+        });
     }
 
     public PostModel getOnePost(Long id) {
-        return postRepo.findPostById(id);
+        return postRepo.findPostById(id).orElseThrow(() -> new NoContentException("Post not found"));
     }
 
     public Page<PostModel> getOneUserPosts(Long userId, Pageable pageable) {
-
         return postRepo.getOneUserPosts(userId, pageable);
     }
 

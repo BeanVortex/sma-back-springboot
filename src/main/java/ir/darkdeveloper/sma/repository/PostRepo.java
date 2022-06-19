@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository;
 
 import ir.darkdeveloper.sma.model.PostModel;
 
+import java.util.Optional;
+
 @Repository
 public interface PostRepo extends PagingAndSortingRepository<PostModel, Long> {
 
@@ -16,8 +18,7 @@ public interface PostRepo extends PagingAndSortingRepository<PostModel, Long> {
 
     void deleteById(Long id);
 
-    @Query("SELECT model FROM PostModel model WHERE model.id = :id")
-    public PostModel findPostById(@Param("id") Long id);
+    Optional<PostModel> findPostById(Long id);
 
     @Query("SELECT model from PostModel model WHERE model.user.id = :id")
     Page<PostModel> getOneUserPosts(@Param("id") Long userId, Pageable pageable);

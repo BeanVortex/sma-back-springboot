@@ -34,15 +34,18 @@ public class PostController {
 
     @PostMapping("/")
     @PreAuthorize("hasAuthority('OP_ADD_POST')")
-    public ResponseEntity<PostDto> savePost(@ModelAttribute PostModel model,HttpServletRequest req) {
+    public ResponseEntity<PostDto> savePost(@ModelAttribute PostModel model, HttpServletRequest req) {
         var savedPost = service.savePost(Optional.ofNullable(model), req);
         return ResponseEntity.ok(mappers.toDto(savedPost));
     }
 
     @GetMapping("/all/")
-    public Page<PostModel> allPosts(Pageable pageable) {
-        return service.allPosts(pageable);
+    public ResponseEntity<Page<PostDto>> findAll(Pageable pageable) {
+        var posts = service.findAll(pageable).map(mappers::toDto);
+        return ResponseEntity.ok(posts);
     }
+
+    // TODO update
 
     @GetMapping("/{id}/")
     public PostModel getOnePost(@PathVariable("id") Long id) {
@@ -50,20 +53,23 @@ public class PostController {
     }
 
     @GetMapping("/search/")
-    public Page<PostModel> searchPost(@RequestParam String content, @RequestParam(required = false) String title,
-                                      Pageable pageable) {
-        return service.searchPost(content, title, pageable);
+    public ResponseEntity<Page<PostDto>> searchPost(@RequestParam(required = false) String title,
+                                                    @RequestParam String content,
+                                                    Pageable pageable) {
+        var posts = service.searchPost(content, title, pageable).map(mappers::toDto);
+        return ResponseEntity.ok(posts);
     }
 
-    @DeleteMapping("/")
+    @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('OP_DELETE_POST')")
-    public ResponseEntity<?> deletePost(HttpServletRequest request, @RequestBody PostModel model) {
-        return service.deletePost(request, model);
+    public ResponseEntity<String> deletePost(@PathVariable Long id, HttpServletRequest req) {
+        return ResponseEntity.ok(service.deletePost(id, req));
     }
 
     @GetMapping("/user/{id}/")
-    public Page<PostModel> getOneUserPosts(@PathVariable("id") Long id, Pageable pageable) {
-        return service.getOneUserPosts(id, pageable);
+    public ResponseEntity<Page<PostDto>> getOneUserPosts(@PathVariable("id") Long id, Pageable pageable) {
+        var posts = service.getOneUserPosts(id, pageable).map(mappers::toDto);
+        return ResponseEntity.ok(posts);
     }
 
 }

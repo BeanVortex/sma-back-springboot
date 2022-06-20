@@ -7,7 +7,6 @@ import ir.darkdeveloper.sma.model.Authority;
 import ir.darkdeveloper.sma.model.CommentModel;
 import ir.darkdeveloper.sma.repository.CommentRepo;
 import ir.darkdeveloper.sma.repository.PostRepo;
-import ir.darkdeveloper.sma.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +18,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.Optional;
 
-import static ir.darkdeveloper.sma.utils.Generics.exceptionHandlers;
+import static ir.darkdeveloper.sma.utils.ExceptionUtils.exceptionHandlers;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +26,6 @@ public class CommentService {
 
     private final CommentRepo commentRepo;
     private final PostRepo postRepo;
-    private final UserRepo userRepo;
 
 
     @Transactional
@@ -44,9 +42,9 @@ public class CommentService {
             var comment = model.orElseThrow(() -> new BadRequestException("Comment can't be null"));
             var auth = SecurityContextHolder.getContext().getAuthentication();
 
-            var user = userRepo
-                    .findUserById(postRepo.findPostById(comment.getPost().getId()).getUser().getId())
-                    .orElseThrow(() -> new NoContentException("User not found"));
+            var user = postRepo.findPostById(comment.getPost().getId())
+                    .orElseThrow(() -> new NoContentException("Post not found"))
+                    .getUser();
 
             if (auth.getName().equals(user.getEmail())
                     || auth.getAuthorities().contains(Authority.OP_DELETE_COMMENT)) {

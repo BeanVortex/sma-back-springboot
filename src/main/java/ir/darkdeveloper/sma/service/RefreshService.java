@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 
-import static ir.darkdeveloper.sma.utils.Generics.exceptionHandlers;
+import java.util.Optional;
+
+import static ir.darkdeveloper.sma.utils.ExceptionUtils.exceptionHandlers;
 
 @Service
 @RequiredArgsConstructor
@@ -35,9 +37,8 @@ public class RefreshService {
         return repo.getRefreshByUserId(id);
     }
 
-    public Long getUserIdByRefreshToken(String token) {
-        return repo.findUserIdByRefreshToken(token)
-                .orElseThrow(() -> new ForbiddenException("You can't do this action"));
+    public Optional<Long> getUserIdByRefreshToken(String token) {
+        return repo.findUserIdByRefreshToken(token);
     }
 
     public Long getIdByUserId(Long adminId) {

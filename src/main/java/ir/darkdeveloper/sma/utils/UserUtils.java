@@ -5,7 +5,6 @@ import ir.darkdeveloper.sma.exceptions.BadRequestException;
 import ir.darkdeveloper.sma.exceptions.ForbiddenException;
 import ir.darkdeveloper.sma.exceptions.NoContentException;
 import ir.darkdeveloper.sma.exceptions.PasswordException;
-import ir.darkdeveloper.sma.model.PostModel;
 import ir.darkdeveloper.sma.model.RefreshModel;
 import ir.darkdeveloper.sma.model.UserModel;
 import ir.darkdeveloper.sma.repository.UserRepo;
@@ -136,5 +135,23 @@ public class UserUtils {
 
         return authenticateUser(loginDto, res);
 
+    }
+
+    public void checkUserIsSameUserForRequest(Long userId, HttpServletRequest req, String operation) {
+        var token = req.getHeader("refresh_token");
+        if (!jwtUtils.isTokenExpired(token)) {
+            var id = jwtUtils.getUserId(token);
+            if (!id.equals(userId))
+                throw new ForbiddenException("You don't have permission to " + operation);
+            else {
+                // in case when attacker tried to change the userId in refreshToken
+                // db query
+                var fetchedId = refreshService.getUserIdByRefreshToken(token)
+                        .orElseThrow(() -> new ForbiddenException("You are logged out. Try logging in again"));
+                if (!fetchedId.equals(id))
+                    throw new ForbiddenException("You don't have permission to " + operation);
+            }
+        } else
+            throw new ForbiddenException("You are logged out. Try logging in again");
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.List;
 
-import static ir.darkdeveloper.sma.utils.Generics.exceptionHandlers;
+import static ir.darkdeveloper.sma.utils.ExceptionUtils.exceptionHandlers;
 
 @Service
 @RequiredArgsConstructor

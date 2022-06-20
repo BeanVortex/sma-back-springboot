@@ -3,7 +3,6 @@ package ir.darkdeveloper.sma.utils;
 import ir.darkdeveloper.sma.exceptions.NoContentException;
 import ir.darkdeveloper.sma.model.RefreshModel;
 import ir.darkdeveloper.sma.service.RefreshService;
-import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
@@ -75,10 +74,12 @@ public class JwtFilter extends OncePerRequestFilter {
             //db query
             var storedRefreshModel = refreshService.getRefreshByUserId(userId);
             var storedAccessToken = storedRefreshModel.getAccessToken();
+            var storedRefreshToken = storedRefreshModel.getRefreshToken();
             if (accessToken.equals(storedAccessToken)) {
                 var newAccessToken = jwtUtils.generateAccessToken(username);
                 var refreshModel = new RefreshModel();
                 refreshModel.setAccessToken(newAccessToken);
+                refreshModel.setRefreshToken(storedRefreshToken);
                 refreshModel.setUserId(userId);
                 refreshModel.setId(storedRefreshModel.getId());
                 // db query

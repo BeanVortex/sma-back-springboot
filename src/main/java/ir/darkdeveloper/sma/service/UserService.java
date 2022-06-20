@@ -2,12 +2,10 @@ package ir.darkdeveloper.sma.service;
 
 import ir.darkdeveloper.sma.dto.LoginDto;
 import ir.darkdeveloper.sma.exceptions.BadRequestException;
-import ir.darkdeveloper.sma.exceptions.ForbiddenException;
 import ir.darkdeveloper.sma.exceptions.NoContentException;
 import ir.darkdeveloper.sma.model.UserModel;
 import ir.darkdeveloper.sma.repository.UserRepo;
 import ir.darkdeveloper.sma.utils.IOUtils;
-import ir.darkdeveloper.sma.utils.JwtUtils;
 import ir.darkdeveloper.sma.utils.PasswordUtils;
 import ir.darkdeveloper.sma.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import java.util.Optional;
 
-import static ir.darkdeveloper.sma.utils.Generics.exceptionHandlers;
+import static ir.darkdeveloper.sma.utils.ExceptionUtils.exceptionHandlers;
 
 @Service("userService")
 @RequiredArgsConstructor
@@ -31,7 +29,6 @@ public class UserService implements UserDetailsService {
 
     private final UserRepo repo;
     private final UserUtils userUtils;
-    private final JwtUtils jwtUtils;
     private final IOUtils ioUtils;
     private final RefreshService refreshService;
     private final PasswordUtils passwordUtils;
@@ -47,7 +44,7 @@ public class UserService implements UserDetailsService {
         return exceptionHandlers(() -> {
             var user = model.orElseThrow(() -> new BadRequestException("User can't be null"));
             var id = model.map(UserModel::getId).orElseThrow(() -> new BadRequestException("body or id of user can't be null"));
-            checkUserIsSameUserForRequest(model.get().getId(), req, "update");
+            userUtils.checkUserIsSameUserForRequest(model.get().getId(), req, "update");
             var foundUser = repo.findById(id).orElseThrow(() -> new NoContentException("User not found"));
 
             if (user.getFile() != null)
@@ -64,7 +61,7 @@ public class UserService implements UserDetailsService {
         return exceptionHandlers(() -> {
             var user = repo.findUserById(id)
                     .orElseThrow(() -> new NoContentException("User does not exist"));
-            checkUserIsSameUserForRequest(id, req, "delete");
+            userUtils.checkUserIsSameUserForRequest(id, req, "delete");
 
             ioUtils.deleteUserImages(user);
             user.getPosts().forEach(ioUtils::deletePostImagesOfUser);
@@ -92,13 +89,5 @@ public class UserService implements UserDetailsService {
         return repo.findUserById(model.getId()).orElseThrow(() -> new NoContentException("User wasn't found"));
     }
 
-    private void checkUserIsSameUserForRequest(Long userId, HttpServletRequest req, String operation) {
-        var token = req.getHeader("refresh_token");
-        if (!jwtUtils.isTokenExpired(token)) {
-            var id = jwtUtils.getUserId(token);
-            if (!userId.equals(id))
-                throw new ForbiddenException("You can't " + operation + " another user's posts");
-        } else
-            throw new ForbiddenException("You are logged out. Try logging in again");
-    }
+
 }

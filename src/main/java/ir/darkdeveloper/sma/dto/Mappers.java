@@ -1,6 +1,7 @@
 package ir.darkdeveloper.sma.dto;
 
 import ir.darkdeveloper.sma.config.StartupConfig;
+import ir.darkdeveloper.sma.model.CommentModel;
 import ir.darkdeveloper.sma.model.PostModel;
 import ir.darkdeveloper.sma.model.UserModel;
 import org.mapstruct.Mapper;
@@ -22,5 +23,13 @@ public interface Mappers {
             @Mapping(target = "updatedAt", dateFormat = StartupConfig.DATE_FORMAT),
     })
     PostDto toDto(PostModel postModel);
+
+    @Mappings({
+            @Mapping(target = "userId", source = "user.id"),
+            @Mapping(target = "postId", source = "post.id"),
+            @Mapping(target = "createdAt", dateFormat = StartupConfig.DATE_FORMAT),
+            @Mapping(target = "updatedAt", dateFormat = StartupConfig.DATE_FORMAT),
+    })
+    CommentDto toDto(CommentModel commentModel);
 
 }

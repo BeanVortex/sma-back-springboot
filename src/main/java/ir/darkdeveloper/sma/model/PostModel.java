@@ -67,9 +67,12 @@ public class PostModel implements ImageUtil {
   @UpdateTimestamp
   private LocalDateTime updatedAt;
 
+  public PostModel(Long id) {
+    this.id = id;
+  }
+
   @Override
   public String getImage() {
     return image;
   }
-
 }

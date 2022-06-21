@@ -1,73 +1,34 @@
 spring:
-  profiles.active: dev
----
-jwt:
-  secretkey: RandomSecret
-jasypt:
-  encryptor:
-    algorithm: PBEWithMD5AndDES
-    iv-generator-classname: org.jasypt.iv.NoIvGenerator
-spring:
-  profiles: dev
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: update
-      naming:
-        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyHbmImpl
-        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        #format_sql: true
-    #show-sql: true
+      ddl-auto: create
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2://mem:db;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:db
     username: sa
     password: sa
-  security:
-    user:
-      name: ENC(1hak+QtSRqr4mBHZJYSx2mUT8bchOLpf)
-      password: ENC(G1d9E+0lFVNTXE6CYoATcA==)
-  banner:
-    location: classpath:banners/banner4
-    # width:
-    # height:
-    # margin:
-    # invert:
 
-server:
-  port: 8080
-# docker-secret:
-#   bind-path: /run/secrets
+user:
+  admin:
+    id: -1
+    username: DarkDeveloper
+    password: 1234
+    authorities:
+      - OP_ACCESS_ADMIN
+      - OP_EDIT_ADMIN
+      - OP_ADD_ADMIN
+      - OP_DELETE_ADMIN
+      - OP_ADD_ROLE
+      - OP_ACCESS_ROLE
+      - OP_DELETE_ROLE
+      - OP_ACCESS_USER
+      - OP_EDIT_USER
+      - OP_DELETE_USER
+      - OP_ADD_USER
+      - OP_DELETE_POST
+      - OP_DELETE_COMMENT
+  email-verification-disabled: true
 
-#server.ssl.key-store-type=JKS
-#server.ssl.key-store=classpath:keystore.jks
-#server.ssl.key-store-password=123456
-#server.ssl.key-alias=tomcat
-#
-#security.require-ssl=true
-
-# jasypt.encryptor.algorithm=PBEWithMD5AndDES
-# jasypt.encryptor.iv-generator-classname=org.jasypt.iv.NoIvGenerator
-
-#docker-secret.bind-path=/run/secrets
-
-#debug=true
-#trace=true
-
-# Keep the connection alive if idle for a long time (needed in production)
-#spring.datasource.testWhileIdle=true
-#spring.datasource.validationQuery=SELECT 1
-# ===============================
-# = JPA / HIBERNATE
-# ===============================
-# Show or not log for each sql query
-# Hibernate ddl auto (create, create-drop, update): with "create-drop" the database
-# schema will be automatically created afresh for every start of application
-#spring.thymeleaf.cache=false
-# Naming strategy
-#spring.jpa.hibernate.naming.implicit-strategy=org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyHbmImpl
-#spring.jpa.hibernate.naming.physical-strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
-# Allows Hibernate to generate SQL optimized for a particular DBMS
+jwt:
+  secretKey: RandomSecret

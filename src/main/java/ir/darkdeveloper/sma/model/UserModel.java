@@ -28,6 +28,7 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@Builder
 public class UserModel implements UserDetails, ImageUtil, UpdateModel<UserModel> {
 
     @Id
@@ -53,10 +54,10 @@ public class UserModel implements UserDetails, ImageUtil, UpdateModel<UserModel>
     @Transient
     private String prevPassword;
 
-    private Boolean enabled = true;
+    private Boolean enabled;
 
     @Transient
-    private MultipartFile file;
+    private MultipartFile profileFile;
 
     @Column(name = "profile")
     private String profilePicture;
@@ -125,7 +126,7 @@ public class UserModel implements UserDetails, ImageUtil, UpdateModel<UserModel>
 
     @Override
     public boolean isEnabled() {
-        return this.getEnabled();
+        return true;
     }
 
     @Override
@@ -137,7 +138,6 @@ public class UserModel implements UserDetails, ImageUtil, UpdateModel<UserModel>
     public void update(UserModel model) {
         id = model.id != null || id == null ? model.id : id;
         userName = model.userName != null || userName == null ? model.userName : userName;
-        enabled = model.enabled != null || enabled == null ? model.enabled : enabled;
         profilePicture = model.profilePicture != null || profilePicture == null ? model.profilePicture : profilePicture;
         createdAt = model.createdAt != null || createdAt == null ? model.createdAt : createdAt;
         updatedAt = model.updatedAt != null || updatedAt == null ? model.updatedAt : updatedAt;

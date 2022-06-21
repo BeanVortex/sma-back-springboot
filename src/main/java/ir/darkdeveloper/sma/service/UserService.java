@@ -43,12 +43,13 @@ public class UserService implements UserDetailsService {
     public UserModel updateUser(Optional<UserModel> model, HttpServletRequest req) {
         return exceptionHandlers(() -> {
             var user = model.orElseThrow(() -> new BadRequestException("User can't be null"));
-            var id = model.map(UserModel::getId).orElseThrow(() -> new BadRequestException("body or id of user can't be null"));
+            var id = model.map(UserModel::getId)
+                    .orElseThrow(() -> new BadRequestException("body or id of user can't be null"));
             userUtils.checkUserIsSameUserForRequest(model.get().getId(), req, "update");
             var foundUser = repo.findById(id).orElseThrow(() -> new NoContentException("User not found"));
 
-            if (user.getFile() != null)
-                ioUtils.saveFile(user.getFile(), IOUtils.USER_IMAGE_PATH).ifPresent(foundUser::setProfilePicture);
+            if (user.getProfileFile() != null)
+                ioUtils.saveFile(user.getProfileFile(), IOUtils.USER_IMAGE_PATH).ifPresent(foundUser::setProfilePicture);
 
             passwordUtils.updatePasswordUsingPrevious(Optional.of(user), foundUser);
             foundUser.update(user);
@@ -85,8 +86,8 @@ public class UserService implements UserDetailsService {
         return exceptionHandlers(() -> userUtils.signup(model, res));
     }
 
-    public UserModel getUserInfo(UserModel model) {
-        return repo.findUserById(model.getId()).orElseThrow(() -> new NoContentException("User wasn't found"));
+    public UserModel getUserInfo(Long id) {
+        return repo.findUserById(id).orElseThrow(() -> new NoContentException("User wasn't found"));
     }
 
 

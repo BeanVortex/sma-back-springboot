@@ -40,29 +40,28 @@ public class UserController {
         return ResponseEntity.ok(mappers.toDto(loggedInUser));
     }
 
-    @PostMapping("/update/")
-    @PreAuthorize("hasAnyAuthority('OP_ACCESS_ADMIN','OP_ACCESS_USER')")
+    @PutMapping("/update/")
+    @PreAuthorize("hasAuthority('OP_EDIT_USER')")
     public ResponseEntity<UserDto> updateUser(@ModelAttribute UserModel model, HttpServletRequest req) {
         var updatedUser = userService.updateUser(Optional.ofNullable(model), req);
         return ResponseEntity.ok(mappers.toDto(updatedUser));
     }
 
-
-    @DeleteMapping("/{id}/")
-    @PreAuthorize("hasAnyAuthority('OP_ACCESS_ADMIN','OP_ACCESS_USER')")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id, HttpServletRequest req) {
-        return ResponseEntity.ok(userService.deleteUser(id, req));
-    }
-
     @GetMapping("/all/")
-    @PreAuthorize("hasAnyAuthority('OP_ACCESS_ADMIN','OP_ACCESS_USER')")
+    @PreAuthorize("hasAuthority('OP_ACCESS_USER')")
     public ResponseEntity<Page<UserDto>> findAll(Pageable pageable) {
         return ResponseEntity.ok(userService.findAll(pageable).map(mappers::toDto));
     }
 
-    @GetMapping("/")
-    @PreAuthorize("hasAnyAuthority('OP_ACCESS_ADMIN','OP_ACCESS_USER')")
-    public ResponseEntity<UserDto> getUserInfo(@RequestBody UserModel model) {
-        return ResponseEntity.ok(mappers.toDto(userService.getUserInfo(model)));
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('OP_ACCESS_USER')")
+    public ResponseEntity<UserDto> getUserInfo(@PathVariable Long id) {
+        return ResponseEntity.ok(mappers.toDto(userService.getUserInfo(id)));
+    }
+
+    @DeleteMapping("/{id}/")
+    @PreAuthorize("hasAuthority('OP_DELETE_USER')")
+    public ResponseEntity<String> deleteUser(@PathVariable Long id, HttpServletRequest req) {
+        return ResponseEntity.ok(userService.deleteUser(id, req));
     }
 }

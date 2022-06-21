@@ -84,14 +84,14 @@ public class IOUtils {
     public void saveUserImages(UserModel user) {
 
 
-        var profileFileExists = user.getFile() != null;
+        var profileFileExists = user.getProfileFile() != null;
 
         if (!profileFileExists) {
             user.setProfilePicture(DEFAULT_PROFILE_IMAGE);
             return;
         }
 
-        saveFile(user.getFile(), USER_IMAGE_PATH).ifPresent(user::setProfilePicture);
+        saveFile(user.getProfileFile(), USER_IMAGE_PATH).ifPresent(user::setProfilePicture);
 
     }
 }

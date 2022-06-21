@@ -34,6 +34,8 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'com.h2database:h2:2.1.212'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test:5.7.1'
+
 
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.1.Final'
     annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'

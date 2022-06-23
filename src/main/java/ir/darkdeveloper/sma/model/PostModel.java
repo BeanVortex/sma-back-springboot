@@ -22,7 +22,7 @@ import java.util.List;
 @Entity
 @Table(name = "posts")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class PostModel implements ImageUtil {
+public class PostModel implements ImageUtil, UpdateModel<PostModel> {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -74,5 +74,17 @@ public class PostModel implements ImageUtil {
   @Override
   public String getImage() {
     return image;
+  }
+
+  @Override
+  public void update(PostModel model) {
+    id = model.id != null || id == null ? model.id : id;
+    title = model.title != null || title == null ? model.title : title;
+    content = model.content != null || content == null ? model.content : content;
+    likes = model.likes != null || likes == null ? model.likes : likes;
+    image = model.image != null || image == null ? model.image : image;
+    file = model.file != null || file == null ? model.file : file;
+    createdAt = model.createdAt != null || createdAt == null ? model.createdAt : createdAt;
+    updatedAt = model.updatedAt != null || updatedAt == null ? model.updatedAt : updatedAt;
   }
 }

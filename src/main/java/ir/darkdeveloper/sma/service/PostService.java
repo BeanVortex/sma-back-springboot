@@ -10,9 +10,6 @@ import ir.darkdeveloper.sma.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,8 +31,7 @@ public class PostService {
     public PostModel savePost(Optional<PostModel> postModel, HttpServletRequest req) {
         return exceptionHandlers(() -> {
             var post = postModel.orElseThrow(() -> new BadRequestException("Post can't be null"));
-            var userId = post.getUser().getId();
-            userUtils.checkUserIsSameUserForRequest(userId, req, "save");
+            var userId = userUtils.checkUserIsSameUserForRequest(null, req, "save");
             postModel.map(PostModel::getId).ifPresent(id -> post.setId(null));
             post.setUser(new UserModel(userId));
             ioUtils.saveFile(post.getFile(), POST_IMAGE_PATH).ifPresent(post::setImage);
@@ -43,15 +39,28 @@ public class PostService {
         });
     }
 
-    // TODO
-    @PreAuthorize("authentication.name != 'anonymousUser'")
-    public ResponseEntity<?> newLike(PostModel model) {
+    @Transactional
+    public PostModel updatePost(Optional<PostModel> model, Long id, HttpServletRequest req) {
+        return exceptionHandlers(() -> {
+            var post = model.orElseThrow(() -> new BadRequestException("Post can't be null"));
+            var foundPost = postRepo.findPostById(id)
+                    .orElseThrow(() -> new BadRequestException("Post with this id, does not exists"));
+            var userId = foundPost.getUser().getId();
+            userUtils.checkUserIsSameUserForRequest(userId, req, "update");
+            foundPost.update(post);
+            ioUtils.updatePostFile(foundPost);
+            foundPost.setUser(new UserModel(userId));
+            return postRepo.save(foundPost);
+        });
+    }
 
-        Long id = model.getId();
-        PostModel model2 = postRepo.findPostById(id).orElseThrow(() -> new NoContentException("Post not found"));
-        Long likes = model2.getLikes();
-        model2.setLikes(++likes);
-        return new ResponseEntity<>(HttpStatus.OK);
+    @Transactional
+    public PostModel likePost(Long postId) {
+        var post = postRepo.findPostById(postId)
+                .orElseThrow(() -> new NoContentException("Post not found"));
+        var likes = post.getLikes();
+        post.setLikes(++likes);
+        return postRepo.save(post);
     }
 
     @Transactional

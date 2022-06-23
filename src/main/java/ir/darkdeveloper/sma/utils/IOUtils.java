@@ -94,4 +94,12 @@ public class IOUtils {
         saveFile(user.getProfileFile(), USER_IMAGE_PATH).ifPresent(user::setProfilePicture);
 
     }
+
+    public void updatePostFile(PostModel post) {
+        var file = post.getFile();
+        if (file != null) {
+            deleteAnImage(post, POST_IMAGE_PATH);
+            saveFile(file, POST_IMAGE_PATH).ifPresent(post::setImage);
+        }
+    }
 }

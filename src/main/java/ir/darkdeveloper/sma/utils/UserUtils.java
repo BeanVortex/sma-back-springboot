@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static ir.darkdeveloper.sma.config.StartupConfig.DATE_FORMATTER;
 
@@ -127,7 +128,7 @@ public class UserUtils {
         var rawPass = model.map(UserModel::getPassword)
                 .orElseThrow(() -> new PasswordException("Password is required!"));
         validateUserData(model);
-        user.setRoles(List.of(rolesService.getRoles("USER")));
+        user.setRoles(Set.of(rolesService.getRoles("USER")));
         ioUtils.saveUserImages(user);
         user.setPassword(encoder.encode(user.getPassword()));
         repo.save(user);
@@ -141,7 +142,7 @@ public class UserUtils {
     /**
      * @param userId if it is null, then it compares id in jwt token and id mapped to this token in database
      */
-    public void checkUserIsSameUserForRequest(Long userId, HttpServletRequest req, String operation) {
+    public Long checkUserIsSameUserForRequest(Long userId, HttpServletRequest req, String operation) {
         var token = req.getHeader("refresh_token");
         if (!jwtUtils.isTokenExpired(token)) {
             var id = jwtUtils.getUserId(token);
@@ -154,6 +155,7 @@ public class UserUtils {
                         .orElseThrow(() -> new ForbiddenException("You are logged out. Try logging in again"));
                 if (!fetchedId.equals(id))
                     throw new ForbiddenException("You don't have permission to " + operation);
+                return fetchedId;
             }
         } else
             throw new ForbiddenException("You are logged out. Try logging in again");

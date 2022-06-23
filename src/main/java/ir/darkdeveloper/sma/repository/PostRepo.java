@@ -14,9 +14,10 @@ import java.util.Optional;
 @Repository
 public interface PostRepo extends PagingAndSortingRepository<PostModel, Long> {
 
+    @Query("SELECT m from PostModel m " +
+            "WHERE UPPER(m.title) LIKE UPPER(CONCAT( '%', :title,'%')) " +
+            "OR UPPER(m.content) LIKE UPPER(CONCAT( '%', :content,'%')) ")
     Page<PostModel> findByContentAndTitleContains(String content, String title, Pageable pageable);
-
-    void deleteById(Long id);
 
     Optional<PostModel> findPostById(Long id);
 

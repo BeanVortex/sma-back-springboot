@@ -1,6 +1,7 @@
 package ir.darkdeveloper.sma.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import ir.darkdeveloper.sma.utils.ImageUtil;
 import lombok.*;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -68,9 +70,11 @@ public class UserModel implements UserDetails, ImageUtil, UpdateModel<UserModel>
     private List<PostModel> posts;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "role", referencedColumnName = "name"))
-    private List<UserRoles> roles;
+    @JoinTable(name = "users_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role"))
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Set<UserRoles> roles;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
@@ -139,6 +143,7 @@ public class UserModel implements UserDetails, ImageUtil, UpdateModel<UserModel>
         id = model.id != null || id == null ? model.id : id;
         userName = model.userName != null || userName == null ? model.userName : userName;
         profilePicture = model.profilePicture != null || profilePicture == null ? model.profilePicture : profilePicture;
+        password = model.password != null || password == null ? model.password : password;
         createdAt = model.createdAt != null || createdAt == null ? model.createdAt : createdAt;
         updatedAt = model.updatedAt != null || updatedAt == null ? model.updatedAt : updatedAt;
     }

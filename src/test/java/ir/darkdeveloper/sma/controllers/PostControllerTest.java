@@ -1,9 +1,7 @@
 package ir.darkdeveloper.sma.controllers;
 
 import ir.darkdeveloper.sma.TestUtils;
-import ir.darkdeveloper.sma.model.PostModel;
 import ir.darkdeveloper.sma.model.UserModel;
-import ir.darkdeveloper.sma.repository.UserRepo;
 import ir.darkdeveloper.sma.service.UserService;
 import ir.darkdeveloper.sma.utils.JwtUtils;
 import org.hamcrest.Matchers;
@@ -22,15 +20,10 @@ import org.springframework.mock.web.MockPart;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Part;
-
 import java.util.Optional;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -54,7 +47,6 @@ record PostControllerTest(MockMvc mockMvc,
     private static Long userId;
     private static Long postId;
     private static String imageName;
-    private static HttpServletRequest request;
     private static final String userName = "user n";
     private static final String password = "Pass!12";
     private static final String email = "email@mail.com";
@@ -78,7 +70,6 @@ record PostControllerTest(MockMvc mockMvc,
         userService.signUpUser(Optional.of(user), response);
         userId = user.getId();
         var userEmail = user.getEmail();
-        request = testUtils.setUpHeaderAndGetReq(userEmail, userId);
         authHeaders = testUtils.getAuthHeaders(userEmail, userId);
     }
 

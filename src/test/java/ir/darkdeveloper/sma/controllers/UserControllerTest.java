@@ -5,6 +5,7 @@ import ir.darkdeveloper.sma.utils.JwtUtils;
 import org.json.JSONObject;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -27,15 +28,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DirtiesContext
-public record UserControllerTest(WebApplicationContext webApplicationContext,
-                                 JwtUtils jwtUtils) {
+@AutoConfigureMockMvc
+public record UserControllerTest(JwtUtils jwtUtils,
+                                 MockMvc mockMvc) {
 
 
     @Autowired
     public UserControllerTest {
     }
 
-    private static MockMvc mockMvc;
     private static String signupRefreshToken;
     private static Long userId;
     private static String signupAccessToken;
@@ -44,11 +45,6 @@ public record UserControllerTest(WebApplicationContext webApplicationContext,
     private static final String password = "Pass!12";
     private static final String email = "email@mail.com";
 
-
-    @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-    }
 
     @Test
     @Order(1)

@@ -17,7 +17,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "comments")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class CommentModel {
+@Builder
+public class CommentModel implements UpdateModel<CommentModel> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,4 +45,12 @@ public class CommentModel {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    @Override
+    public void update(CommentModel model) {
+        id = model.id != null || id == null ? model.id : id;
+        content = model.content != null || content == null ? model.content : content;
+        likes = model.likes != null || likes == null ? model.likes : likes;
+        createdAt = model.createdAt != null || createdAt == null ? model.createdAt : createdAt;
+        updatedAt = model.updatedAt != null || updatedAt == null ? model.updatedAt : updatedAt;
+    }
 }

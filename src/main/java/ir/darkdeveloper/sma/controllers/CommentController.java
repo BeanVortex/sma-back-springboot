@@ -2,6 +2,7 @@ package ir.darkdeveloper.sma.controllers;
 
 import ir.darkdeveloper.sma.dto.CommentDto;
 import ir.darkdeveloper.sma.dto.Mappers;
+import ir.darkdeveloper.sma.dto.PostDto;
 import ir.darkdeveloper.sma.model.CommentModel;
 import ir.darkdeveloper.sma.service.CommentService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ public class CommentController {
     private final CommentService service;
     private final Mappers mappers;
 
-    @PostMapping("/{postId}")
+    @PostMapping("/{postId}/")
     @PreAuthorize("hasAuthority('OP_ADD_COMMENT')")
     public ResponseEntity<CommentDto> saveComment(@RequestBody CommentModel model,
                                                   @PathVariable Long postId,
@@ -31,14 +32,32 @@ public class CommentController {
         return ResponseEntity.ok(mappers.toDto(savedComment));
     }
 
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('OP_DELETE_COMMENT')")
-    public ResponseEntity<String> deleteComment(@PathVariable Long id, HttpServletRequest req) {
-        return ResponseEntity.ok(service.deleteComment(id, req));
+    @PutMapping("/{commentId}/")
+    @PreAuthorize("hasAuthority('OP_EDIT_COMMENT')")
+    public ResponseEntity<CommentDto> updateComment(@RequestBody CommentModel model,
+                                                    @PathVariable Long commentId,
+                                                    HttpServletRequest req) {
+        var updatedComment = service.updateComment(Optional.ofNullable(model), commentId, req);
+        return ResponseEntity.ok(mappers.toDto(updatedComment));
     }
+
+
+    @PutMapping("/like/{commentId}/")
+    @PreAuthorize("hasAuthority('OP_ACCESS_USER')")
+    public ResponseEntity<CommentDto> likeComment(@PathVariable Long commentId) {
+        var savedComment = service.likeComment(commentId);
+        return ResponseEntity.ok(mappers.toDto(savedComment));
+    }
+
 
     @GetMapping("/{postId}/")
     public Page<CommentDto> getPostComments(@PathVariable("postId") Long postId, Pageable pageable) {
         return service.getPostComments(Optional.ofNullable(postId), pageable).map(mappers::toDto);
+    }
+
+    @DeleteMapping("/{commentId}/")
+    @PreAuthorize("hasAuthority('OP_DELETE_COMMENT')")
+    public ResponseEntity<String> deleteComment(@PathVariable Long commentId, HttpServletRequest req) {
+        return ResponseEntity.ok(service.deleteComment(commentId, req));
     }
 }

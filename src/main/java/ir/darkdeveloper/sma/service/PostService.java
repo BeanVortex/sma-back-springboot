@@ -43,7 +43,7 @@ public class PostService {
     public PostModel updatePost(Optional<PostModel> model, Long id, HttpServletRequest req) {
         return exceptionHandlers(() -> {
             var post = model.orElseThrow(() -> new BadRequestException("Post can't be null"));
-            var foundPost = postRepo.findPostById(id)
+            var foundPost = postRepo.findById(id)
                     .orElseThrow(() -> new BadRequestException("Post with this id, does not exists"));
             var userId = foundPost.getUser().getId();
             userUtils.checkUserIsSameUserForRequest(userId, req, "update");
@@ -56,7 +56,7 @@ public class PostService {
 
     @Transactional
     public PostModel likePost(Long postId) {
-        var post = postRepo.findPostById(postId)
+        var post = postRepo.findById(postId)
                 .orElseThrow(() -> new NoContentException("Post not found"));
         var likes = post.getLikes();
         post.setLikes(++likes);
@@ -75,7 +75,7 @@ public class PostService {
     @Transactional
     public String deletePost(Long id, HttpServletRequest req) {
         return exceptionHandlers(() -> {
-            var post = postRepo.findPostById(id)
+            var post = postRepo.findById(id)
                     .orElseThrow(() -> new NoContentException("Post not found"));
             userUtils.checkUserIsSameUserForRequest(post.getUser().getId(), req, "delete");
             ioUtils.deletePostImagesOfUser(post);
@@ -85,7 +85,7 @@ public class PostService {
     }
 
     public PostModel getOnePost(Long id) {
-        return postRepo.findPostById(id).orElseThrow(() -> new NoContentException("Post not found"));
+        return postRepo.findById(id).orElseThrow(() -> new NoContentException("Post not found"));
     }
 
     public Page<PostModel> getOneUserPosts(Long userId, Pageable pageable) {

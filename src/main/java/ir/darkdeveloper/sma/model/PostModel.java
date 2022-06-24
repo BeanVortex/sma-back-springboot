@@ -22,6 +22,7 @@ import java.util.List;
 @Entity
 @Table(name = "posts")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@Builder
 public class PostModel implements ImageUtil, UpdateModel<PostModel> {
 
   @Id

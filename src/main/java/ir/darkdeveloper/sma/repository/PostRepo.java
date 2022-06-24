@@ -19,7 +19,6 @@ public interface PostRepo extends PagingAndSortingRepository<PostModel, Long> {
             "OR UPPER(m.content) LIKE UPPER(CONCAT( '%', :content,'%')) ")
     Page<PostModel> findByContentAndTitleContains(String content, String title, Pageable pageable);
 
-    Optional<PostModel> findPostById(Long id);
 
     @Query("SELECT model from PostModel model WHERE model.user.id = :id")
     Page<PostModel> getOneUserPosts(@Param("id") Long userId, Pageable pageable);

@@ -55,8 +55,7 @@ public class PostModel implements ImageUtil, UpdateModel<PostModel> {
    * and then delete the original that you wanted to delete. SHOULD
    * USE @OnDelete(action = OnDeleteAction = CASCADE)
    */
-  @OneToMany(mappedBy = "post")
-  @OnDelete(action = OnDeleteAction.CASCADE)
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
   @ToString.Exclude
   private List<CommentModel> comments;
 

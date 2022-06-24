@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
@@ -64,8 +65,7 @@ public class UserModel implements UserDetails, ImageUtil, UpdateModel<UserModel>
     @Column(name = "profile")
     private String profilePicture;
 
-    @OneToMany(mappedBy = "user")
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<PostModel> posts;
 

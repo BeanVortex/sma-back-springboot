@@ -1,15 +1,16 @@
 package ir.darkdeveloper.sma.controllers;
 
 import ir.darkdeveloper.sma.TestUtils;
+import ir.darkdeveloper.sma.model.CommentModel;
+import ir.darkdeveloper.sma.model.PostModel;
 import ir.darkdeveloper.sma.model.UserModel;
+import ir.darkdeveloper.sma.repository.UserRepo;
+import ir.darkdeveloper.sma.service.PostService;
 import ir.darkdeveloper.sma.service.UserService;
 import ir.darkdeveloper.sma.utils.JwtUtils;
 import org.hamcrest.Matchers;
 import org.json.JSONObject;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -31,12 +33,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @AutoConfigureMockMvc
-@DirtiesContext
 record PostControllerTest(MockMvc mockMvc,
                           JwtUtils jwtUtils,
                           UserService userService,
+                          PostService postService,
+                          UserRepo userRepo,
                           TestUtils testUtils) {
 
     @Autowired
@@ -57,9 +59,8 @@ record PostControllerTest(MockMvc mockMvc,
     private static final String likes = "10";
 
 
-    @Test
-    @Order(1)
-    void signUpUser() {
+    @BeforeEach
+    void setUp() {
         var user = UserModel.builder()
                 .userName(userName)
                 .password(password)
@@ -70,11 +71,31 @@ record PostControllerTest(MockMvc mockMvc,
         userService.signUpUser(Optional.of(user), response);
         userId = user.getId();
         var userEmail = user.getEmail();
+        var request = testUtils.setUpHeaderAndGetReq(userEmail, userId);
         authHeaders = testUtils.getAuthHeaders(userEmail, userId);
+
+        var file = new MockMultipartFile("file", "hello.jpg", MediaType.IMAGE_JPEG_VALUE,
+                "Hello, World!".getBytes());
+        var post = PostModel.builder()
+                .content(content)
+                .likes(Long.valueOf(likes))
+                .title(title)
+                .file(file)
+                .build();
+
+        var savedPost = postService.savePost(Optional.of(post), request);
+        postId = savedPost.getId();
+        imageName = savedPost.getImage();
+
     }
 
+    @AfterEach
+    void cleanUp() {
+        userRepo.deleteAll();
+    }
+
+
     @Test
-    @Order(2)
     void savePost() throws Exception {
         var title = new MockPart("title", PostControllerTest.title.getBytes());
         var content = new MockPart("content", PostControllerTest.content.getBytes());
@@ -93,15 +114,10 @@ record PostControllerTest(MockMvc mockMvc,
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.userId").value(is(userId), Long.class))
                 .andExpect(jsonPath("$.image").exists())
-                .andDo(result -> {
-                    var jsonObject = new JSONObject(result.getResponse().getContentAsString());
-                    postId = jsonObject.getLong("id");
-                    imageName = jsonObject.getString("image");
-                });
+        ;
     }
 
     @Test
-    @Order(3)
     void findAll() throws Exception {
         mockMvc.perform(get("/api/post/all/")
                         .headers(authHeaders)
@@ -115,7 +131,6 @@ record PostControllerTest(MockMvc mockMvc,
     }
 
     @Test
-    @Order(3)
     void updatePost() throws Exception {
 
         var title = new MockPart("title", PostControllerTest.updatedTitle.getBytes());
@@ -138,16 +153,15 @@ record PostControllerTest(MockMvc mockMvc,
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.userId").value(is(userId), Long.class))
                 .andExpect(jsonPath("$.image").exists())
-                .andExpect(jsonPath("$.image").value(Matchers.not(imageName)))
+                .andExpect(jsonPath("$.image").value(not(imageName)))
                 .andExpect(jsonPath("$.title").value(is(updatedTitle)))
                 .andExpect(jsonPath("$.content").value(is(updatedContent)))
-                .andExpect(jsonPath("$.likes").value(is(Long.valueOf(likes)), Long.class))
+                .andExpect(jsonPath("$.likes").value(is(Long.parseLong(likes)), Long.class))
         ;
 
     }
 
     @Test
-    @Order(4)
     void likePost() throws Exception {
 
 
@@ -160,15 +174,14 @@ record PostControllerTest(MockMvc mockMvc,
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.userId").value(is(userId), Long.class))
                 .andExpect(jsonPath("$.image").exists())
-                .andExpect(jsonPath("$.image").value(Matchers.not(imageName)))
-                .andExpect(jsonPath("$.title").value(is(updatedTitle)))
-                .andExpect(jsonPath("$.content").value(is(updatedContent)))
+                .andExpect(jsonPath("$.image").value(is(imageName)))
+                .andExpect(jsonPath("$.title").value(is(title)))
+                .andExpect(jsonPath("$.content").value(is(content)))
                 .andExpect(jsonPath("$.likes").value(is(Long.parseLong(likes) + 1), Long.class))
         ;
     }
 
     @Test
-    @Order(5)
     void getOnePost() throws Exception {
         mockMvc.perform(get("/api/post/{id}/", postId)
                         .headers(authHeaders)
@@ -179,15 +192,14 @@ record PostControllerTest(MockMvc mockMvc,
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.userId").value(is(userId), Long.class))
                 .andExpect(jsonPath("$.image").exists())
-                .andExpect(jsonPath("$.image").value(Matchers.not(imageName)))
-                .andExpect(jsonPath("$.title").value(is(updatedTitle)))
-                .andExpect(jsonPath("$.content").value(is(updatedContent)))
-                .andExpect(jsonPath("$.likes").value(is(Long.parseLong(likes) + 1), Long.class))
+                .andExpect(jsonPath("$.image").value(is(imageName)))
+                .andExpect(jsonPath("$.title").value(is(title)))
+                .andExpect(jsonPath("$.content").value(is(content)))
+                .andExpect(jsonPath("$.likes").value(is(Long.parseLong(likes)), Long.class))
         ;
     }
 
     @Test
-    @Order(6)
     void searchPost() throws Exception {
         mockMvc.perform(get("/api/post/search/")
                         .param("title", "som")
@@ -200,16 +212,15 @@ record PostControllerTest(MockMvc mockMvc,
                 .andExpect(jsonPath("$.content[0].id").exists())
                 .andExpect(jsonPath("$.content[0].userId").value(is(userId), Long.class))
                 .andExpect(jsonPath("$.content[0].image").exists())
-                .andExpect(jsonPath("$.content[0].image").value(Matchers.not(imageName)))
-                .andExpect(jsonPath("$.content[0].title").value(is(updatedTitle)))
-                .andExpect(jsonPath("$.content[0].content").value(is(updatedContent)))
-                .andExpect(jsonPath("$.content[0].likes").value(is(Long.parseLong(likes) + 1), Long.class))
+                .andExpect(jsonPath("$.content[0].image").value(is(imageName)))
+                .andExpect(jsonPath("$.content[0].title").value(is(title)))
+                .andExpect(jsonPath("$.content[0].content").value(is(content)))
+                .andExpect(jsonPath("$.content[0].likes").value(is(Long.parseLong(likes)), Long.class))
         ;
 
     }
 
     @Test
-    @Order(7)
     void getOneUserPosts() throws Exception {
         mockMvc.perform(get("/api/post/user/{id}/", userId)
                         .headers(authHeaders)
@@ -220,15 +231,14 @@ record PostControllerTest(MockMvc mockMvc,
                 .andExpect(jsonPath("$.content[0].id").exists())
                 .andExpect(jsonPath("$.content[0].userId").value(is(userId), Long.class))
                 .andExpect(jsonPath("$.content[0].image").exists())
-                .andExpect(jsonPath("$.content[0].image").value(Matchers.not(imageName)))
-                .andExpect(jsonPath("$.content[0].title").value(is(updatedTitle)))
-                .andExpect(jsonPath("$.content[0].content").value(is(updatedContent)))
-                .andExpect(jsonPath("$.content[0].likes").value(is(Long.parseLong(likes) + 1), Long.class))
+                .andExpect(jsonPath("$.content[0].image").value(is(imageName)))
+                .andExpect(jsonPath("$.content[0].title").value(is(title)))
+                .andExpect(jsonPath("$.content[0].content").value(is(content)))
+                .andExpect(jsonPath("$.content[0].likes").value(is(Long.parseLong(likes)), Long.class))
         ;
     }
 
     @Test
-    @Order(8)
     void deletePost() throws Exception {
         mockMvc.perform(delete("/api/post/{id}/", postId)
                         .headers(authHeaders)

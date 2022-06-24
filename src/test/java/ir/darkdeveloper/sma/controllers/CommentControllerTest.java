@@ -4,14 +4,12 @@ import ir.darkdeveloper.sma.TestUtils;
 import ir.darkdeveloper.sma.model.CommentModel;
 import ir.darkdeveloper.sma.model.PostModel;
 import ir.darkdeveloper.sma.model.UserModel;
+import ir.darkdeveloper.sma.repository.UserRepo;
+import ir.darkdeveloper.sma.service.CommentService;
 import ir.darkdeveloper.sma.service.PostService;
 import ir.darkdeveloper.sma.service.UserService;
 import ir.darkdeveloper.sma.utils.JwtUtils;
-import org.json.JSONObject;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
 
@@ -33,14 +30,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @AutoConfigureMockMvc
-@DirtiesContext
 record CommentControllerTest(MockMvc mockMvc,
                              JwtUtils jwtUtils,
                              UserService userService,
+                             UserRepo userRepo,
                              TestUtils testUtils,
-                             PostService postService) {
+                             PostService postService,
+                             CommentService commentService) {
 
     @Autowired
     public CommentControllerTest {
@@ -50,7 +47,6 @@ record CommentControllerTest(MockMvc mockMvc,
     private static Long userId;
     private static Long postId;
     private static Long commentId;
-    private static HttpServletRequest request;
 
     private static final String userName = "user n";
     private static final String password = "Pass!12";
@@ -62,9 +58,9 @@ record CommentControllerTest(MockMvc mockMvc,
     private static final String updatedCommentContent = "some updated comment content";
     private static final String commentLikes = "16";
 
-    @Test
-    @Order(1)
-    void signupUser() {
+
+    @BeforeEach
+    void setUp() {
         var user = UserModel.builder()
                 .userName(userName)
                 .password(password)
@@ -75,13 +71,9 @@ record CommentControllerTest(MockMvc mockMvc,
         userService.signUpUser(Optional.of(user), response);
         userId = user.getId();
         var userEmail = user.getEmail();
-        request = testUtils.setUpHeaderAndGetReq(userEmail, userId);
+        var request = testUtils.setUpHeaderAndGetReq(userEmail, userId);
         authHeaders = testUtils.getAuthHeaders(userEmail, userId);
-    }
 
-    @Test
-    @Order(2)
-    void savePost() {
         var post = PostModel.builder()
                 .content(postContent)
                 .likes(Long.valueOf(postLikes))
@@ -90,10 +82,22 @@ record CommentControllerTest(MockMvc mockMvc,
 
         var savedPost = postService.savePost(Optional.of(post), request);
         postId = savedPost.getId();
+
+        var comment = CommentModel.builder()
+                .content(commentContent)
+                .likes(Long.valueOf(commentLikes))
+                .build();
+        var savedComment = commentService.saveComment(Optional.of(comment), postId, request);
+        commentId = savedComment.getId();
     }
 
+    @AfterEach
+    void cleanUp() {
+        userRepo.deleteAll();
+    }
+
+
     @Test
-    @Order(3)
     void saveComment() throws Exception {
         var comment = CommentModel.builder()
                 .content(commentContent)
@@ -115,16 +119,11 @@ record CommentControllerTest(MockMvc mockMvc,
                 .andExpect(jsonPath("$.userId").exists())
                 .andExpect(jsonPath("$.userId").value(is(userId), Long.class))
                 .andExpect(jsonPath("$.likes").value(is(Long.valueOf(commentLikes)), Long.class))
-                .andDo(result -> {
-                    var json = new JSONObject(result.getResponse().getContentAsString());
-                    commentId = json.getLong("id");
-                })
         ;
 
     }
 
     @Test
-    @Order(4)
     void updateComment() throws Exception {
         var comment = CommentModel.builder()
                 .content(updatedCommentContent)
@@ -151,7 +150,6 @@ record CommentControllerTest(MockMvc mockMvc,
     }
 
     @Test
-    @Order(5)
     void likeComment() throws Exception {
         mockMvc.perform(put("/api/post/comment/like/{commentId}/", commentId)
                         .headers(authHeaders)
@@ -161,13 +159,12 @@ record CommentControllerTest(MockMvc mockMvc,
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.userId").value(is(userId), Long.class))
-                .andExpect(jsonPath("$.content").value(is(updatedCommentContent)))
+                .andExpect(jsonPath("$.content").value(is(commentContent)))
                 .andExpect(jsonPath("$.likes").value(is(Long.parseLong(commentLikes) + 1), Long.class))
         ;
     }
 
     @Test
-    @Order(6)
     void getPostComments() throws Exception {
         mockMvc.perform(get("/api/post/comment/{postId}/", postId)
                         .headers(authHeaders)
@@ -182,13 +179,12 @@ record CommentControllerTest(MockMvc mockMvc,
                 .andExpect(jsonPath("$.content[0].postId").value(is(postId), Long.class))
                 .andExpect(jsonPath("$.content[0].userId").exists())
                 .andExpect(jsonPath("$.content[0].userId").value(is(userId), Long.class))
-                .andExpect(jsonPath("$.content[0].content").value(is(updatedCommentContent)))
-                .andExpect(jsonPath("$.content[0].likes").value(is(Long.parseLong(commentLikes) + 1), Long.class))
+                .andExpect(jsonPath("$.content[0].content").value(is(commentContent)))
+                .andExpect(jsonPath("$.content[0].likes").value(is(Long.parseLong(commentLikes)), Long.class))
         ;
     }
 
     @Test
-    @Order(7)
     void deleteComment() throws Exception {
         mockMvc.perform(delete("/api/post/comment/{commentId}/", commentId)
                         .headers(authHeaders)

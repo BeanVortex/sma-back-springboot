@@ -9,6 +9,7 @@ import ir.darkdeveloper.sma.utils.IOUtils;
 import ir.darkdeveloper.sma.utils.PasswordUtils;
 import ir.darkdeveloper.sma.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,10 +25,11 @@ import java.util.Optional;
 import static ir.darkdeveloper.sma.utils.ExceptionUtils.exceptionHandlers;
 
 @Service("userService")
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Lazy))
 public class UserService implements UserDetailsService {
 
     private final UserRepo repo;
+    @Lazy
     private final UserUtils userUtils;
     private final IOUtils ioUtils;
     private final RefreshService refreshService;

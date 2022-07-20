@@ -53,7 +53,7 @@ public class UserUtils {
         if (credentials.username().equals(adminUser.username())) {
             rModel.setUserId(adminUser.id());
             rModel.setId(refreshService.getIdByUserId(adminUser.id()));
-            user.setEnabled(true);
+//            user.setEnabled(true);
         } else {
             user = repo.findByEmailOrUsername(username)
                     .orElseThrow(() -> new NoContentException("User does not exist"));

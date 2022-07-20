@@ -57,7 +57,7 @@ public class UserModel implements UserDetails, ImageUtil, UpdateModel<UserModel>
     @Transient
     private String prevPassword;
 
-    private Boolean enabled;
+    private final Boolean enabled = true;
 
     @Transient
     private MultipartFile profileFile;

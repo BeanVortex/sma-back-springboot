@@ -8,6 +8,9 @@ import ir.darkdeveloper.sma.repository.UserRepo;
 import ir.darkdeveloper.sma.utils.IOUtils;
 import ir.darkdeveloper.sma.utils.PasswordUtils;
 import ir.darkdeveloper.sma.utils.UserUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
@@ -17,9 +20,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.transaction.Transactional;
 import java.util.Optional;
 
 import static ir.darkdeveloper.sma.utils.ExceptionUtils.exceptionHandlers;

@@ -1,98 +1,82 @@
 package ir.darkdeveloper.sma.utils;
 
 import io.jsonwebtoken.*;
-import lombok.Getter;
-import lombok.Setter;
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import javax.crypto.SecretKey;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.function.Function;
 
-@Service
-@Getter
-@Setter
 @Slf4j
+@Component
 public class JwtUtils {
 
-    // defined in application.properties or application.yml
-    @Value("${jwt.secretKey}")
-    private String secret;
+    public static Long refreshExpire;
+    public static Long accessExpire;
+    public static SecretKey key;
+    public static JwtParser parser;
 
-    private final PasswordEncoder encoder;
-    private final Long refreshExpire;
-    private final Long accessExpire;
-
-    @Autowired
-    public JwtUtils(PasswordEncoder encoder) {
-        this.encoder = encoder;
+    public JwtUtils() {
         refreshExpire = (long) (60 * 60 * 24 * 7 * 3 * 1000);
         accessExpire = (long) (60 * 1000);
     }
 
     @PostConstruct
     public void initSecret() {
-        // encodes the jwt secret
         // note that previous token after restarting application won't work
-        secret = encoder.encode(secret);
+        key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+        parser = Jwts.parserBuilder().setSigningKey(key).build();
     }
 
     // generates a unique jwt token
-    public String generateRefreshToken(String username, Long userId) {
+    public static String generateRefreshToken(String username, Long userId) {
         // expires in 21 days
         var date = new Date(System.currentTimeMillis() + refreshExpire);
         return Jwts.builder()
-                .signWith(SignatureAlgorithm.HS256, secret)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .setIssuedAt(new Date())
                 .setSubject(username)
                 .claim("user_id", userId).setExpiration(date).compact();
     }
 
     // Generates access token
-    public String generateAccessToken(String username) {
+    public static String generateAccessToken(String username) {
         var date = new Date(System.currentTimeMillis() + accessExpire);
-        return Jwts.builder().signWith(SignatureAlgorithm.HS256, secret).setSubject(username)
+        return Jwts.builder()
+                .setSubject(username)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .setIssuedAt(new Date())
                 .setExpiration(date).compact();
     }
 
-    public String getUsername(String token) {
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
+    public static String getUsername(String token) {
+        return parser.parseClaimsJws(token).getBody().getSubject();
     }
 
-    public Long getUserId(String refreshToken) {
-        return ((Integer) getAllClaimsFromToken(refreshToken).get("user_id")).longValue();
+    public static Long getUserId(String refreshToken) {
+        return getAllClaimsFromToken(refreshToken).get("user_id", Double.class).longValue();
     }
 
-    public Claims getAllClaimsFromToken(String token) throws JwtException {
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+    public static Claims getAllClaimsFromToken(String token) throws JwtException {
+        return parser.parseClaimsJws(token).getBody();
     }
 
-    public Boolean isTokenExpired(String token) {
+    // Todo: handle token exceptions
+    public static Boolean isTokenExpired(String token) {
         try {
-            Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
+            parser.parseClaimsJws(token);
             return false;
-        } catch (SignatureException e) {
-            log.error("Invalid JWT signature: {}", e.getMessage());
-        } catch (MalformedJwtException e) {
-            log.error("Invalid JWT token: {}", e.getMessage());
-        } catch (ExpiredJwtException e) {
-            log.error("JWT token is expired: {}", e.getMessage());
-        } catch (UnsupportedJwtException e) {
-            log.error("JWT token is unsupported: {}", e.getMessage());
-        } catch (IllegalArgumentException e) {
-            log.error("JWT claims string is empty: {}", e.getMessage());
+        } catch (Exception ignore) {
         }
         return true;
     }
 
-    public LocalDateTime getExpirationDate(String token) throws JwtException {
+    public static LocalDateTime getExpirationDate(String token) throws JwtException {
         return getClaimFromToken(token, Claims::getExpiration)
                 .toInstant().atZone(ZoneId.systemDefault())
                 .toLocalDateTime();
@@ -103,7 +87,7 @@ public class JwtUtils {
         Jwts.claims(getAllClaimsFromToken(token)).setExpiration(new Date(till));
     }
 
-    public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
+    public static  <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
         var claims = getAllClaimsFromToken(token);
         return claimsResolver.apply(claims);
     }

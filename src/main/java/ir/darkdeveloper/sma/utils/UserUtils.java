@@ -10,6 +10,8 @@ import ir.darkdeveloper.sma.model.UserModel;
 import ir.darkdeveloper.sma.repository.UserRepo;
 import ir.darkdeveloper.sma.service.RefreshService;
 import ir.darkdeveloper.sma.service.UserRolesService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,9 +20,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -32,7 +31,6 @@ public class UserUtils {
 
 
     private final AuthenticationManager authManager;
-    private final JwtUtils jwtUtils;
     private final PasswordUtils passwordUtils;
     private final RefreshService refreshService;
     private final UserRepo repo;
@@ -70,8 +68,8 @@ public class UserUtils {
             throw new BadRequestException("Bad Credentials");
         }
 
-        var accessToken = jwtUtils.generateAccessToken(username);
-        var refreshToken = jwtUtils.generateRefreshToken(username, rModel.getUserId());
+        var accessToken = JwtUtils.generateAccessToken(username);
+        var refreshToken = JwtUtils.generateRefreshToken(username, rModel.getUserId());
 
         rModel.setAccessToken(accessToken);
         rModel.setRefreshToken(refreshToken);
@@ -104,7 +102,7 @@ public class UserUtils {
 
 
     public void setupHeader(HttpServletResponse response, String accessToken, String refreshToken) {
-        var date = jwtUtils.getExpirationDate(refreshToken);
+        var date = JwtUtils.getExpirationDate(refreshToken);
         var refreshDate = DATE_FORMATTER.format(date);
         response.addHeader("refresh_token", refreshToken);
         response.addHeader("access_token", accessToken);
@@ -144,8 +142,8 @@ public class UserUtils {
      */
     public Long checkUserIsSameUserForRequest(Long userId, HttpServletRequest req, String operation) {
         var token = req.getHeader("refresh_token");
-        if (!jwtUtils.isTokenExpired(token)) {
-            var id = jwtUtils.getUserId(token);
+        if (!JwtUtils.isTokenExpired(token)) {
+            var id = JwtUtils.getUserId(token);
             if (userId != null && !id.equals(userId))
                 throw new ForbiddenException("You don't have permission to " + operation);
             else {

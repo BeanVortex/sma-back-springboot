@@ -1,13 +1,12 @@
 package ir.darkdeveloper.sma.service;
 
 
-import ir.darkdeveloper.sma.exceptions.ForbiddenException;
 import ir.darkdeveloper.sma.model.RefreshModel;
 import ir.darkdeveloper.sma.repository.RefreshRepo;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 
 import java.util.Optional;
 

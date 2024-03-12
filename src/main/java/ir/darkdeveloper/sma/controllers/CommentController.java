@@ -2,7 +2,6 @@ package ir.darkdeveloper.sma.controllers;
 
 import ir.darkdeveloper.sma.dto.CommentDto;
 import ir.darkdeveloper.sma.dto.Mappers;
-import ir.darkdeveloper.sma.dto.PostDto;
 import ir.darkdeveloper.sma.model.CommentModel;
 import ir.darkdeveloper.sma.service.CommentService;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
 @RestController

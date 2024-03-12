@@ -1,6 +1,6 @@
 package ir.darkdeveloper.sma.controllers;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import ir.darkdeveloper.sma.dto.PostDto;
 import ir.darkdeveloper.sma.dto.Mappers;

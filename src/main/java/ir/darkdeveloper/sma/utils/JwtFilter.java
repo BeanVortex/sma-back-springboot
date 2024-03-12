@@ -3,6 +3,10 @@ package ir.darkdeveloper.sma.utils;
 import ir.darkdeveloper.sma.exceptions.NoContentException;
 import ir.darkdeveloper.sma.model.RefreshModel;
 import ir.darkdeveloper.sma.service.RefreshService;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
@@ -11,10 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.Optional;
 
@@ -24,7 +25,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Lazy
     private final UserUtils userUtils;
-    private final JwtUtils jwtUtils;
     private final RefreshService refreshService;
 
 
@@ -39,10 +39,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
 
         if (refreshToken.isPresent() && accessToken.isPresent()
-                && !jwtUtils.isTokenExpired(refreshToken.get())) {
+                && !JwtUtils.isTokenExpired(refreshToken.get())) {
 
-            var username = jwtUtils.getUsername(refreshToken.get());
-            var userId = ((Integer) jwtUtils.getAllClaimsFromToken(refreshToken.get())
+            var username = JwtUtils.getUsername(refreshToken.get());
+            var userId = ((Integer) JwtUtils.getAllClaimsFromToken(refreshToken.get())
                     .get("user_id")).longValue();
             authenticateUser(username);
             setUpHeader(response, accessToken.get(), username, userId);
@@ -70,13 +70,13 @@ public class JwtFilter extends OncePerRequestFilter {
 
 
         // if this didn't execute, it means the access token is still valid
-        if (jwtUtils.isTokenExpired(accessToken)) {
+        if (JwtUtils.isTokenExpired(accessToken)) {
             //db query
             var storedRefreshModel = refreshService.getRefreshByUserId(userId);
             var storedAccessToken = storedRefreshModel.getAccessToken();
             var storedRefreshToken = storedRefreshModel.getRefreshToken();
             if (accessToken.equals(storedAccessToken)) {
-                var newAccessToken = jwtUtils.generateAccessToken(username);
+                var newAccessToken = JwtUtils.generateAccessToken(username);
                 var refreshModel = new RefreshModel();
                 refreshModel.setAccessToken(newAccessToken);
                 refreshModel.setRefreshToken(storedRefreshToken);

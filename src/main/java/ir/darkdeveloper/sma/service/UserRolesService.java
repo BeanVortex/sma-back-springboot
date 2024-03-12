@@ -2,10 +2,10 @@ package ir.darkdeveloper.sma.service;
 
 import ir.darkdeveloper.sma.model.UserRoles;
 import ir.darkdeveloper.sma.repository.UserRolesRepo;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 import static ir.darkdeveloper.sma.utils.ExceptionUtils.exceptionHandlers;

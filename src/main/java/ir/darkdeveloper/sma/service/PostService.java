@@ -7,13 +7,13 @@ import ir.darkdeveloper.sma.model.UserModel;
 import ir.darkdeveloper.sma.repository.PostRepo;
 import ir.darkdeveloper.sma.utils.IOUtils;
 import ir.darkdeveloper.sma.utils.UserUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.transaction.Transactional;
 import java.util.Optional;
 
 import static ir.darkdeveloper.sma.utils.ExceptionUtils.exceptionHandlers;
